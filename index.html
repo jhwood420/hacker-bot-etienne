@@ -26,8 +26,17 @@
     --muted: #8e8e93;
     --border: rgba(255,255,255,0.1);
 }
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:rgba(10,132,255,0.15); }
-html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); }
+*, *::before, *::after {
+    margin: 0; padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: rgba(10,132,255,0.2);
+    -webkit-touch-callout: none;
+}
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+}
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
     color: var(--text);
@@ -50,8 +59,6 @@ body {
     align-items: flex-end;
     justify-content: space-between;
     padding: 0 20px 6px;
-    font-size: 12px;
-    font-weight: 600;
 }
 .status-time { font-size: 15px; font-weight: 700; }
 .status-icons { display: flex; gap: 6px; align-items: center; }
@@ -68,6 +75,8 @@ body {
     border-bottom: 0.5px solid var(--border);
     flex-shrink: 0;
     gap: 12px;
+    position: relative;
+    z-index: 10;
 }
 .nav-back {
     color: var(--accent);
@@ -75,44 +84,44 @@ body {
     display: flex;
     align-items: center;
     gap: 3px;
-    min-width: 70px;
+    min-width: 60px;
     cursor: pointer;
     touch-action: manipulation;
+    pointer-events: auto;
+    -webkit-user-select: none;
+    user-select: none;
 }
 .nav-center {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
-    cursor: pointer;
+    gap: 2px;
 }
 .nav-avatar-wrap {
     position: relative;
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
 }
 .nav-avatar-wrap img {
-    width: 40px;
-    height: 40px;
+    width: 40px; height: 40px;
     border-radius: 50%;
     object-fit: cover;
 }
 .online-dot {
     position: absolute;
-    bottom: 1px;
-    right: 1px;
-    width: 10px;
-    height: 10px;
+    bottom: 1px; right: 1px;
+    width: 10px; height: 10px;
     background: var(--green);
     border-radius: 50%;
     border: 2px solid #000;
 }
 .nav-name { font-size: 13px; font-weight: 600; }
 .nav-status { font-size: 11px; color: var(--muted); }
-.nav-actions { display: flex; gap: 10px; min-width: 70px; justify-content: flex-end; }
+.nav-actions { display: flex; gap: 8px; min-width: 60px; justify-content: flex-end; }
+
+/* NAV BUTTONS - ULTRA CLICKABLE */
 .nav-icon-btn {
-    width: 32px; height: 32px;
+    width: 34px; height: 34px;
     border-radius: 50%;
     background: var(--bg3);
     border: none;
@@ -121,10 +130,19 @@ body {
     justify-content: center;
     cursor: pointer;
     touch-action: manipulation;
+    pointer-events: auto;
+    position: relative;
+    z-index: 100;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
-.nav-icon-btn svg { width: 16px; height: 16px; fill: var(--text); }
+.nav-icon-btn:active { opacity: 0.7; transform: scale(0.94); }
+.nav-icon-btn svg { width: 16px; height: 16px; fill: var(--text); pointer-events: none; }
 
-/* TOPIC PILLS */
+/* PILLS */
 .pills-wrap {
     padding: 8px 12px;
     overflow-x: auto;
@@ -134,25 +152,34 @@ body {
     border-bottom: 0.5px solid var(--border);
     flex-shrink: 0;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 .pills-wrap::-webkit-scrollbar { display: none; }
 .pill {
     padding: 6px 14px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
     background: var(--bg2);
     border: 1px solid;
     cursor: pointer;
     touch-action: manipulation;
+    pointer-events: auto;
     flex-shrink: 0;
-    letter-spacing: 0.2px;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    position: relative;
+    z-index: 5;
 }
-.pill.b { color: var(--accent); border-color: rgba(10,132,255,0.3); }
-.pill.g { color: var(--green); border-color: rgba(48,209,88,0.3); }
-.pill.p { color: var(--purple); border-color: rgba(191,90,242,0.3); }
-.pill.o { color: var(--orange); border-color: rgba(255,159,10,0.3); }
+.pill:active { opacity: 0.7; }
+.pill.b { color: var(--accent); border-color: rgba(10,132,255,0.35); }
+.pill.g { color: var(--green); border-color: rgba(48,209,88,0.35); }
+.pill.p { color: var(--purple); border-color: rgba(191,90,242,0.35); }
+.pill.o { color: var(--orange); border-color: rgba(255,159,10,0.35); }
 
 /* CHAT */
 .chat {
@@ -178,16 +205,18 @@ body {
     text-align: center;
 }
 .wcard-avatar {
-    width: 70px; height: 70px;
+    width: 72px; height: 72px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--accent);
-    box-shadow: 0 0 20px rgba(10,132,255,0.4);
+    box-shadow: 0 0 24px rgba(10,132,255,0.4);
     margin-bottom: 10px;
 }
 .wcard h2 { font-size: 19px; font-weight: 700; margin-bottom: 5px; }
 .wcard p { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
 .wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* WELCOME GRID ITEMS - ULTRA CLICKABLE */
 .wgitem {
     background: var(--bg3);
     border-radius: 14px;
@@ -199,10 +228,23 @@ body {
     gap: 7px;
     cursor: pointer;
     touch-action: manipulation;
+    pointer-events: auto;
     text-align: left;
     line-height: 1.3;
+    border: none;
+    color: var(--text);
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    -webkit-user-select: none;
+    user-select: none;
+    position: relative;
+    z-index: 5;
+    width: 100%;
 }
-.wgitem span { font-size: 20px; flex-shrink: 0; }
+.wgitem:active { opacity: 0.7; transform: scale(0.97); }
+.wgitem .icon { font-size: 20px; flex-shrink: 0; }
 
 /* MESSAGES */
 .mrow { display: flex; flex-direction: column; margin-bottom: 1px; }
@@ -222,7 +264,7 @@ body {
 @keyframes pop { from { transform:scale(0.85); opacity:0; } to { transform:scale(1); opacity:1; } }
 .mrow.b .bubble { background: var(--bg2); border-bottom-left-radius: 4px; }
 .mrow.u .bubble { background: var(--accent); border-bottom-right-radius: 4px; }
-.bubble pre { background:rgba(0,0,0,0.5); border-radius:8px; padding:10px; overflow-x:auto; margin:8px 0; font-size:12px; color:var(--green); font-family:monospace; }
+.bubble pre { background:rgba(0,0,0,0.5); border-radius:8px; padding:10px; overflow-x:auto; margin:8px 0; font-size:12px; color:var(--green); font-family:monospace; white-space:pre-wrap; }
 .bubble code { background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px; font-size:12px; color:var(--green); font-family:monospace; }
 .bubble pre code { background:none; padding:0; }
 .bubble strong { color: #fff; }
@@ -237,13 +279,13 @@ body {
 .tbub span:nth-child(3) { animation-delay: .3s; }
 @keyframes bn { 0%,60%,100%{transform:translateY(0);opacity:.4;} 30%{transform:translateY(-5px);opacity:1;} }
 
-/* CAMERA PREVIEW */
+/* CAMERA */
 .cam-preview {
     display: none;
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: #000;
-    z-index: 1000;
+    z-index: 9999;
     flex-direction: column;
 }
 .cam-preview.active { display: flex; }
@@ -266,11 +308,17 @@ body {
     justify-content: center;
     font-size: 24px;
     touch-action: manipulation;
+    pointer-events: auto;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 .cam-shutter { background: #fff; width: 70px; height: 70px; border: 4px solid rgba(255,255,255,0.5); }
-.cam-close { background: var(--bg3); }
+.cam-close, .cam-flip { background: var(--bg3); }
+.cam-btn:active { opacity: 0.7; }
 
-/* INPUT */
+/* INPUT AREA */
 .input-area {
     padding: 8px 10px;
     padding-bottom: calc(8px + var(--safe-bottom));
@@ -279,6 +327,8 @@ body {
     -webkit-backdrop-filter: blur(20px);
     border-top: 0.5px solid var(--border);
     flex-shrink: 0;
+    position: relative;
+    z-index: 20;
 }
 .chips-row {
     display: flex;
@@ -286,22 +336,35 @@ body {
     overflow-x: auto;
     padding-bottom: 7px;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 .chips-row::-webkit-scrollbar { display: none; }
+
+/* CHIPS - ULTRA CLICKABLE */
 .chip {
     background: var(--bg2);
     border: 0.5px solid var(--border);
     color: var(--accent);
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
+    padding: 7px 14px;
+    border-radius: 18px;
+    font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
     font-family: inherit;
     cursor: pointer;
     touch-action: manipulation;
+    pointer-events: auto;
     flex-shrink: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    -webkit-user-select: none;
+    user-select: none;
+    position: relative;
+    z-index: 20;
 }
+.chip:active { opacity: 0.7; background: var(--bg3); }
+
 .irow {
     display: flex;
     align-items: flex-end;
@@ -318,19 +381,21 @@ body {
     outline: none;
     color: var(--text);
     font-family: inherit;
-    font-size: 15px;
+    font-size: 16px;
     resize: none;
     max-height: 90px;
     min-height: 22px;
     line-height: 1.4;
     scrollbar-width: none;
     padding: 2px 0;
+    -webkit-appearance: none;
 }
 #inp::placeholder { color: var(--muted); }
 #inp::-webkit-scrollbar { display: none; }
 
+/* INPUT BUTTONS - ULTRA CLICKABLE */
 .ibtn {
-    width: 32px; height: 32px;
+    width: 34px; height: 34px;
     border-radius: 50%;
     border: none;
     display: flex;
@@ -338,20 +403,27 @@ body {
     justify-content: center;
     cursor: pointer;
     touch-action: manipulation;
+    pointer-events: auto;
     flex-shrink: 0;
-    transition: all 0.15s;
+    transition: all 0.12s;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    -webkit-user-select: none;
+    user-select: none;
+    position: relative;
+    z-index: 20;
 }
+.ibtn:active { opacity: 0.7; transform: scale(0.9); }
 #sbtn { background: var(--accent); }
-#sbtn svg { fill: white; width: 15px; height: 15px; }
+#sbtn svg { fill: white; width: 15px; height: 15px; pointer-events: none; }
 #micBtn { background: var(--bg3); }
-#micBtn svg { fill: var(--muted); width: 15px; height: 15px; }
+#micBtn svg { fill: var(--muted); width: 16px; height: 16px; pointer-events: none; }
 #micBtn.listening { background: var(--red); animation: pulse 1s infinite; }
 #micBtn.listening svg { fill: white; }
 #micBtn.speaking { background: var(--green); }
 #micBtn.speaking svg { fill: white; }
-#camBtn { background: var(--bg3); }
-#camBtn svg { fill: var(--muted); width: 15px; height: 15px; }
-@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
 </style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
@@ -374,19 +446,19 @@ body {
         </svg>
         Chats
     </div>
-    <div class="nav-center" id="navCenter">
+    <div class="nav-center">
         <div class="nav-avatar-wrap">
             <img src="avatar.png" alt="Étienne">
             <div class="online-dot"></div>
         </div>
         <div class="nav-name">Étienne</div>
-        <div class="nav-status">AI Hacking Assistant</div>
+        <div class="nav-status">AI Hacking Assistant · GPT-4o</div>
     </div>
     <div class="nav-actions">
-        <button class="nav-icon-btn" id="voiceToggle" title="Voice on/off">
+        <button class="nav-icon-btn" id="voiceToggle" type="button" title="Voice on/off">
             <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
         </button>
-        <button class="nav-icon-btn" id="camBtn" title="Camera">
+        <button class="nav-icon-btn" id="camBtn" type="button" title="Camera">
             <svg viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
         </button>
     </div>
@@ -394,35 +466,35 @@ body {
 
 <!-- Topic Pills -->
 <div class="pills-wrap" id="pillsWrap">
-    <div class="pill b" data-topic="Python scripting">🐍 Python</div>
-    <div class="pill g" data-topic="ethical hacking roadmap">🔐 Hacking</div>
-    <div class="pill p" data-topic="CTF challenges">🚩 CTF</div>
-    <div class="pill o" data-topic="OSINT and Shodan">🔍 OSINT</div>
-    <div class="pill b" data-topic="how Tor works">🧅 Tor</div>
-    <div class="pill g" data-topic="Linux commands">🐧 Linux</div>
-    <div class="pill p" data-topic="SQL injection">💉 SQLi</div>
-    <div class="pill o" data-topic="network privacy VPN">📡 Privacy</div>
-    <div class="pill b" data-topic="Nmap scanning">🗺️ Nmap</div>
-    <div class="pill g" data-topic="cryptography">🔑 Crypto</div>
-    <div class="pill p" data-topic="Metasploit">🔫 Metasploit</div>
-    <div class="pill o" data-topic="dark web safety">🛡️ Dark Web</div>
-    <div class="pill b" data-topic="XSS attacks">⚡ XSS</div>
-    <div class="pill g" data-topic="Bash scripting">📜 Bash</div>
+    <button class="pill b" type="button" data-topic="Python scripting">🐍 Python</button>
+    <button class="pill g" type="button" data-topic="ethical hacking roadmap">🔐 Hacking</button>
+    <button class="pill p" type="button" data-topic="CTF challenges">🚩 CTF</button>
+    <button class="pill o" type="button" data-topic="OSINT and Shodan">🔍 OSINT</button>
+    <button class="pill b" type="button" data-topic="how Tor works">🧅 Tor</button>
+    <button class="pill g" type="button" data-topic="Linux commands">🐧 Linux</button>
+    <button class="pill p" type="button" data-topic="SQL injection">💉 SQLi</button>
+    <button class="pill o" type="button" data-topic="network privacy VPN">📡 Privacy</button>
+    <button class="pill b" type="button" data-topic="Nmap scanning">🗺️ Nmap</button>
+    <button class="pill g" type="button" data-topic="cryptography">🔑 Crypto</button>
+    <button class="pill p" type="button" data-topic="Metasploit framework">🔫 Metasploit</button>
+    <button class="pill o" type="button" data-topic="dark web safety">🛡️ Dark Web</button>
+    <button class="pill b" type="button" data-topic="XSS attacks">⚡ XSS</button>
+    <button class="pill g" type="button" data-topic="Bash scripting">📜 Bash</button>
 </div>
 
-<!-- Chat -->
+<!-- Chat Area -->
 <div class="chat" id="chat">
     <div class="wcard" id="wcard">
         <img src="avatar.png" class="wcard-avatar" alt="Étienne">
         <h2>Bonjour, mon ami! 👋</h2>
-        <p>I'm Étienne — your GPT-4o powered French hacking assistant. Tap below or speak to me!</p>
-        <div class="wgrid">
-            <div class="wgitem" data-msg="How do I start ethical hacking?"><span>🔐</span>Ethical Hacking</div>
-            <div class="wgitem" data-msg="Write a Python port scanner"><span>🐍</span>Python Code</div>
-            <div class="wgitem" data-msg="OSINT tools and Shodan recon"><span>🔍</span>OSINT & Recon</div>
-            <div class="wgitem" data-msg="CTF challenges tips and tools"><span>🚩</span>CTF Help</div>
-            <div class="wgitem" data-msg="how Tor works onion architecture"><span>🧅</span>Tor & Privacy</div>
-            <div class="wgitem" data-msg="Explain SQL injection"><span>💉</span>SQL Injection</div>
+        <p>I'm Étienne — your GPT-4o French hacking assistant.<br>Tap a topic below or speak to me!</p>
+        <div class="wgrid" id="wgrid">
+            <button class="wgitem" type="button" data-msg="How do I start ethical hacking?"><span class="icon">🔐</span>Ethical Hacking</button>
+            <button class="wgitem" type="button" data-msg="Write a Python port scanner"><span class="icon">🐍</span>Python Code</button>
+            <button class="wgitem" type="button" data-msg="OSINT tools and Shodan recon"><span class="icon">🔍</span>OSINT & Recon</button>
+            <button class="wgitem" type="button" data-msg="CTF challenges tips and tools"><span class="icon">🚩</span>CTF Help</button>
+            <button class="wgitem" type="button" data-msg="how Tor works onion architecture"><span class="icon">🧅</span>Tor & Privacy</button>
+            <button class="wgitem" type="button" data-msg="Explain SQL injection"><span class="icon">💉</span>SQL Injection</button>
         </div>
     </div>
 </div>
@@ -431,148 +503,203 @@ body {
 <div class="cam-preview" id="camPreview">
     <video id="camVideo" autoplay playsinline muted></video>
     <div class="cam-controls">
-        <button class="cam-btn cam-close" id="camClose">✕</button>
-        <button class="cam-btn cam-shutter" id="camShutter">📷</button>
-        <button class="cam-btn" id="camFlip" style="background:#2c2c2e;">🔄</button>
+        <button class="cam-btn cam-close" id="camClose" type="button">✕</button>
+        <button class="cam-btn cam-shutter" id="camShutter" type="button">📷</button>
+        <button class="cam-btn cam-flip" id="camFlip" type="button">🔄</button>
     </div>
 </div>
 
-<!-- Input -->
+<!-- Input Area -->
 <div class="input-area">
     <div class="chips-row" id="chipsRow">
-        <button class="chip" data-msg="How do I start ethical hacking?">🔐 Start hacking</button>
-        <button class="chip" data-msg="Write a Python port scanner">🐍 Port scanner</button>
-        <button class="chip" data-msg="Common Linux commands">🐧 Linux</button>
-        <button class="chip" data-msg="OSINT tools and Shodan recon">🔍 OSINT</button>
-        <button class="chip" data-msg="network privacy VPN proxychains">📡 Privacy</button>
+        <button class="chip" type="button" data-msg="How do I start ethical hacking?">🔐 Start hacking</button>
+        <button class="chip" type="button" data-msg="Write a Python port scanner">🐍 Port scanner</button>
+        <button class="chip" type="button" data-msg="Common Linux commands">🐧 Linux cmds</button>
+        <button class="chip" type="button" data-msg="OSINT tools and Shodan recon">🔍 OSINT</button>
+        <button class="chip" type="button" data-msg="network privacy VPN proxychains">📡 Privacy</button>
+        <button class="chip" type="button" data-msg="Explain Metasploit framework">🔫 Metasploit</button>
     </div>
     <div class="irow">
-        <button class="ibtn" id="micBtn" title="Voice input">
+        <button class="ibtn" id="micBtn" type="button" title="Voice input">
             <svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 15.2 14.47 17 12 17s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V21c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
         </button>
-        <textarea id="inp" placeholder="Message Étienne..." rows="1"></textarea>
-        <button class="ibtn" id="sbtn">
+        <textarea id="inp" placeholder="Message Étienne..." rows="1" autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
+        <button class="ibtn" id="sbtn" type="button">
             <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
         </button>
     </div>
 </div>
 
-<!-- Config & Scripts -->
+<!-- API Config -->
 <script src="config.js"></script>
+
+<!-- MAIN APP SCRIPT -->
 <script>
-// ============================================
-// GPT-4o
-// ============================================
-const SYSTEM_PROMPT = `You are Étienne, a charming French AI assistant for coding and ethical hacking.
-Personality: witty, confident, charmingly French. Use phrases like "Mon ami", "Ooh là là", "Magnifique!", "Voilà!", "Sacré bleu", "Mais bien sûr!". End with fun French signoffs.
-Expertise: ethical hacking, Python, JavaScript, Bash, network security, CTF, OSINT, SQLi, XSS, Metasploit, Nmap, Burp Suite, Linux, crypto, Tor, dark web awareness, privacy, web dev.
-Always emphasize ethical & legal use. Format code in markdown blocks. Never assist with illegal activities.`;
+(function() {
+'use strict';
 
-const chatHistory = [{role:'system', content:SYSTEM_PROMPT}];
+// ============================================
+// SYSTEM PROMPT
+// ============================================
+var SYSTEM = "You are Étienne, a charming French AI assistant specialized in coding and ethical hacking.\n" +
+"Personality: witty, confident, charmingly French. Use phrases like 'Mon ami', 'Ooh là là', 'Magnifique!', 'Voilà!', 'Sacré bleu', 'Mais bien sûr!'. End with fun French signoffs.\n" +
+"Expertise: ethical hacking, Python, JavaScript, Bash, network security, CTF, OSINT, SQLi, XSS, Metasploit, Nmap, Burp Suite, Linux, cryptography, Tor (educational), dark web awareness, network privacy, web development.\n" +
+"Always emphasize ethical and legal use. Format code in markdown blocks. Never assist with illegal activities.";
 
+var chatHistory = [{role:'system', content:SYSTEM}];
+
+// ============================================
+// GPT-4o API
+// ============================================
 async function callGPT(msg) {
-    const key = window._ETIENNE_KEY || '';
-    if (!key) return "Mon Dieu! No API key found in config.js 🇫🇷";
+    var key = (typeof window._ETIENNE_KEY !== 'undefined') ? window._ETIENNE_KEY : '';
+    if (!key) return "Mon Dieu! No API key found. Please add your key to config.js 🇫🇷";
     chatHistory.push({role:'user', content:msg});
     try {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method:'POST',
-            headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-            body:JSON.stringify({model:'gpt-4o', messages:chatHistory, max_tokens:1000, temperature:0.8})
+        var res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + key
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o',
+                messages: chatHistory,
+                max_tokens: 1000,
+                temperature: 0.85
+            })
         });
-        const data = await res.json();
-        if (data.error) return "Mon Dieu! "+data.error.message;
-        const reply = data.choices[0].message.content;
+        var data = await res.json();
+        if (data.error) return "Mon Dieu! Error: " + data.error.message;
+        var reply = data.choices[0].message.content;
         chatHistory.push({role:'assistant', content:reply});
         return fmtMD(reply);
-    } catch(e) { return "Sacré bleu! Network error, mon ami 🇫🇷"; }
+    } catch(e) {
+        return "Sacré bleu! Network error, mon ami. Check your connection 🇫🇷";
+    }
 }
 
 function fmtMD(t) {
-    t = t.replace(/```(\w+)?\n?([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
-    t = t.replace(/`([^`]+)`/g,'<code>$1</code>');
-    t = t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-    t = t.replace(/\*(.*?)\*/g,'<em>$1</em>');
-    t = t.replace(/\n/g,'<br>');
+    t = t.replace(/```(\w+)?\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+    t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+    t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    t = t.replace(/\n/g, '<br>');
     return t;
 }
 
 // ============================================
-// VOICE - Text to Speech
+// CLOCK
+// ============================================
+function updateClock() {
+    var el = document.getElementById('statusTime');
+    if (!el) return;
+    var now = new Date();
+    var h = now.getHours(), m = now.getMinutes();
+    h = h % 12 || 12;
+    el.textContent = h + ':' + (m < 10 ? '0' : '') + m;
+}
+updateClock();
+setInterval(updateClock, 15000);
+
+// ============================================
+// VOICE - TTS
 // ============================================
 var voiceEnabled = true;
 var isSpeaking = false;
 var selectedVoice = null;
 
 function loadVoices() {
+    if (!window.speechSynthesis) return;
     var voices = window.speechSynthesis.getVoices();
-    var pref = ['Google UK English Male','Daniel','Alex','Microsoft David - English (United States)','Fred'];
-    for (var i=0;i<pref.length;i++) {
-        var v = voices.find(function(v){return v.name===pref[i];});
-        if (v) { selectedVoice=v; break; }
+    var pref = ['Google UK English Male', 'Daniel', 'Alex', 'Microsoft David - English (United States)', 'Fred', 'Google US English'];
+    for (var i = 0; i < pref.length; i++) {
+        var v = voices.find(function(x) { return x.name === pref[i]; });
+        if (v) { selectedVoice = v; return; }
     }
-    if (!selectedVoice) selectedVoice = voices.find(function(v){return v.lang.startsWith('en');}) || voices[0];
+    selectedVoice = voices.find(function(v) { return v.lang && v.lang.startsWith('en'); }) || voices[0] || null;
 }
 
 if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
     loadVoices();
 }
 
 function speak(text) {
     if (!voiceEnabled || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    var clean = text.replace(/<[^>]*>/g,'').replace(/```[\s\S]*?```/g,'code block').replace(/&/g,'and').replace(/</g,'<').replace(/>/g,'>');
-    if (clean.length > 500) clean = clean.substring(0,500)+'...';
+    var clean = text
+        .replace(/<[^>]*>/g, '')
+        .replace(/```[\s\S]*?```/g, 'code block')
+        .replace(/&/g, 'and')
+        .replace(/</g, 'less than')
+        .replace(/>/g, 'greater than');
+    if (clean.length > 500) clean = clean.substring(0, 500) + '...';
     var u = new SpeechSynthesisUtterance(clean);
     if (selectedVoice) u.voice = selectedVoice;
     u.rate = 0.92; u.pitch = 0.88; u.volume = 1.0;
     isSpeaking = true;
-    updateMicState('speaking');
-    u.onend = function(){ isSpeaking=false; updateMicState('idle'); };
+    setMicState('speaking');
+    u.onend = function() { isSpeaking = false; setMicState('idle'); };
+    u.onerror = function() { isSpeaking = false; setMicState('idle'); };
     window.speechSynthesis.speak(u);
 }
 
-function stopSpeak() { window.speechSynthesis.cancel(); isSpeaking=false; updateMicState('idle'); }
+function stopSpeak() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    isSpeaking = false;
+    setMicState('idle');
+}
 
 // ============================================
-// VOICE - Speech Recognition (Microphone)
+// VOICE - STT (Microphone)
 // ============================================
 var recognition = null;
 var isListening = false;
 
 function initRecognition() {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
+    if (!SR) return false;
     recognition = new SR();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = 'en-US';
-    recognition.onstart = function(){ isListening=true; updateMicState('listening'); };
+    recognition.onstart = function() { isListening = true; setMicState('listening'); };
     recognition.onresult = function(e) {
-        var transcript = Array.from(e.results).map(function(r){return r[0].transcript;}).join('');
-        document.getElementById('inp').value = transcript;
-        if (e.results[e.results.length-1].isFinal) {
+        var transcript = Array.from(e.results).map(function(r) { return r[0].transcript; }).join('');
+        var inp = document.getElementById('inp');
+        if (inp) inp.value = transcript;
+        if (e.results[e.results.length - 1].isFinal) {
             isListening = false;
-            updateMicState('idle');
+            setMicState('idle');
             doSend(transcript);
         }
     };
-    recognition.onerror = function(){ isListening=false; updateMicState('idle'); };
-    recognition.onend = function(){ isListening=false; updateMicState('idle'); };
+    recognition.onerror = function() { isListening = false; setMicState('idle'); };
+    recognition.onend = function() { isListening = false; setMicState('idle'); };
+    return true;
 }
 
-function updateMicState(state) {
+function setMicState(state) {
     var btn = document.getElementById('micBtn');
-    btn.className = 'ibtn' + (state==='listening'?' listening':state==='speaking'?' speaking':'');
+    if (!btn) return;
+    btn.className = 'ibtn' + (state === 'listening' ? ' listening' : state === 'speaking' ? ' speaking' : '');
 }
 
 function toggleMic() {
     if (isSpeaking) { stopSpeak(); return; }
-    if (!recognition) initRecognition();
-    if (!recognition) { alert('Voice not supported on this browser'); return; }
-    if (isListening) { recognition.stop(); }
-    else { stopSpeak(); recognition.start(); }
+    if (!recognition) {
+        var ok = initRecognition();
+        if (!ok) { alert('Voice recognition not supported in this browser. Try Chrome or Safari on iOS.'); return; }
+    }
+    if (isListening) {
+        recognition.stop();
+    } else {
+        stopSpeak();
+        try { recognition.start(); } catch(e) { isListening = false; setMicState('idle'); }
+    }
 }
 
 // ============================================
@@ -581,78 +708,89 @@ function toggleMic() {
 var camStream = null;
 var facingMode = 'environment';
 
-async function openCamera() {
-    try {
-        camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facingMode}, audio:false});
-        document.getElementById('camVideo').srcObject = camStream;
-        document.getElementById('camPreview').classList.add('active');
-    } catch(e) { alert('Camera access denied. Please allow camera in Safari settings.'); }
+function openCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera not available. Please allow camera access in Safari settings.');
+        return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode }, audio: false })
+        .then(function(stream) {
+            camStream = stream;
+            var video = document.getElementById('camVideo');
+            if (video) video.srcObject = stream;
+            var preview = document.getElementById('camPreview');
+            if (preview) preview.classList.add('active');
+        })
+        .catch(function() {
+            alert('Camera access denied. Allow camera in Settings > Safari > Camera.');
+        });
 }
 
 function closeCamera() {
-    if (camStream) { camStream.getTracks().forEach(function(t){t.stop();}); camStream=null; }
-    document.getElementById('camPreview').classList.remove('active');
+    if (camStream) {
+        camStream.getTracks().forEach(function(t) { t.stop(); });
+        camStream = null;
+    }
+    var preview = document.getElementById('camPreview');
+    if (preview) preview.classList.remove('active');
 }
 
 function flipCamera() {
-    facingMode = facingMode==='environment'?'user':'environment';
-    closeCamera(); openCamera();
+    facingMode = facingMode === 'environment' ? 'user' : 'environment';
+    closeCamera();
+    setTimeout(openCamera, 300);
 }
 
 function takePhoto() {
     var video = document.getElementById('camVideo');
+    if (!video) return;
     var canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video,0,0);
-    var imgData = canvas.toDataURL('image/jpeg',0.8);
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    var imgData = canvas.toDataURL('image/jpeg', 0.8);
     closeCamera();
-    // Show photo in chat
     var chat = document.getElementById('chat');
+    if (!chat) return;
     var row = document.createElement('div');
     row.className = 'mrow u';
     var wrap = document.createElement('div');
     wrap.className = 'mwrap';
     var bub = document.createElement('div');
     bub.className = 'bubble';
-    bub.style.padding = '4px';
-    bub.innerHTML = '<img src="'+imgData+'" style="max-width:200px;border-radius:12px;display:block;">';
+    bub.style.cssText = 'padding:4px;background:#0a84ff;';
+    bub.innerHTML = '<img src="' + imgData + '" style="max-width:200px;border-radius:12px;display:block;">';
     wrap.appendChild(bub);
     row.appendChild(wrap);
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
-    doSend('I just took a photo. Can you help me analyze what I should look for from a security perspective?');
+    doSend('I just took a photo. What security elements should I be aware of in this environment?');
 }
-
-// ============================================
-// CLOCK
-// ============================================
-function updateClock() {
-    var now = new Date();
-    var h = now.getHours(), m = now.getMinutes();
-    var ampm = h >= 12 ? 'PM' : 'AM';
-    h = h % 12 || 12;
-    document.getElementById('statusTime').textContent = h + ':' + (m<10?'0':'')+m;
-}
-updateClock();
-setInterval(updateClock, 10000);
 
 // ============================================
 // CHAT UI
 // ============================================
-var BICO = '<img src="avatar.png" class="bicon" alt="E">';
+var BICO = '<img src="avatar.png" class="bicon" alt="É">';
 
-function getTime() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+function getTime() {
+    return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
 
 function addMsg(text, isUser) {
     var chat = document.getElementById('chat');
+    if (!chat) return;
     var row = document.createElement('div');
-    row.className = 'mrow '+(isUser?'u':'b');
+    row.className = 'mrow ' + (isUser ? 'u' : 'b');
     var wrap = document.createElement('div');
     wrap.className = 'mwrap';
-    if (!isUser) { var ic=document.createElement('div'); ic.innerHTML=BICO; wrap.appendChild(ic.firstChild); }
+    if (!isUser) {
+        var ic = document.createElement('div');
+        ic.innerHTML = BICO;
+        wrap.appendChild(ic.firstChild);
+    }
     var bub = document.createElement('div');
     bub.className = 'bubble';
-    if (isUser) bub.textContent=text; else bub.innerHTML=text;
+    if (isUser) { bub.textContent = text; } else { bub.innerHTML = text; }
     wrap.appendChild(bub);
     row.appendChild(wrap);
     var t = document.createElement('div');
@@ -664,60 +802,163 @@ function addMsg(text, isUser) {
 }
 
 function showTyping() {
+    hideTyping();
     var chat = document.getElementById('chat');
+    if (!chat) return;
     var d = document.createElement('div');
-    d.className = 'trow'; d.id = 'typing';
-    d.innerHTML = BICO+'<div class="tbub"><span></span><span></span><span></span></div>';
+    d.id = 'typing';
+    d.className = 'trow';
+    d.innerHTML = BICO + '<div class="tbub"><span></span><span></span><span></span></div>';
     chat.appendChild(d);
     chat.scrollTop = chat.scrollHeight;
 }
 
-function hideTyping() { var t=document.getElementById('typing'); if(t)t.remove(); }
+function hideTyping() {
+    var t = document.getElementById('typing');
+    if (t) t.parentNode.removeChild(t);
+}
 
 async function doSend(text) {
-    if (!text||!text.trim()) return;
-    var cr = document.getElementById('chipsRow');
-    if (cr) cr.style.display='none';
+    if (!text || !text.trim()) return;
+    text = text.trim();
+
+    // Hide chips row and welcome card on first message
+    var chips = document.getElementById('chipsRow');
+    if (chips) chips.style.display = 'none';
+
     stopSpeak();
     addMsg(text, true);
+
     var inp = document.getElementById('inp');
-    inp.value=''; inp.style.height='auto';
+    if (inp) { inp.value = ''; inp.style.height = 'auto'; }
+
     showTyping();
     var reply = await callGPT(text);
     hideTyping();
     addMsg(reply, false);
-    speak(reply);
+    if (voiceEnabled) speak(reply.replace(/<[^>]*>/g, ''));
 }
 
 // ============================================
-// INTRO SPEECH on load
+// INTRO SPEECH
 // ============================================
-window.addEventListener('load', function(){
-    setTimeout(function(){
-        speak("Bonjour mon ami! I am Étienne, your personal French hacking and coding assistant, powered by G P T 4. I am here to help you with ethical hacking, Python, cybersecurity, and much more. Ask me anything — I never disappoint! Voilà!");
-    }, 1500);
-});
+function doIntro() {
+    var intro = "Bonjour mon ami! I am Étienne, your personal French hacking and coding assistant, powered by G P T 4. I am here to help you with ethical hacking, Python, cybersecurity, O S I N T, and much more. Ask me anything — I never disappoint! Voilà!";
+    speak(intro);
+}
 
 // ============================================
-// EVENT LISTENERS
+// ATTACH ALL EVENTS — using both click and touchend
 // ============================================
-document.getElementById('sbtn').addEventListener('click', function(){ doSend(document.getElementById('inp').value.trim()); });
-document.getElementById('inp').addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend(this.value.trim());} });
-document.getElementById('inp').addEventListener('input', function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,90)+'px'; });
-document.getElementById('micBtn').addEventListener('click', toggleMic);
-document.getElementById('camBtn').addEventListener('click', openCamera);
-document.getElementById('camClose').addEventListener('click', closeCamera);
-document.getElementById('camShutter').addEventListener('click', takePhoto);
-document.getElementById('camFlip').addEventListener('click', flipCamera);
-document.getElementById('voiceToggle').addEventListener('click', function(){
-    voiceEnabled = !voiceEnabled;
-    stopSpeak();
-    this.style.opacity = voiceEnabled ? '1' : '0.4';
-    this.title = voiceEnabled ? 'Voice on' : 'Voice off';
-});
-document.getElementById('pillsWrap').addEventListener('click', function(e){ var p=e.target.closest('[data-topic]'); if(p) doSend('Tell me about '+p.getAttribute('data-topic')); });
-document.getElementById('wcard').addEventListener('click', function(e){ var p=e.target.closest('[data-msg]'); if(p) doSend(p.getAttribute('data-msg')); });
-document.getElementById('chipsRow').addEventListener('click', function(e){ var p=e.target.closest('[data-msg]'); if(p) doSend(p.getAttribute('data-msg')); });
+function tap(el, fn) {
+    if (!el) return;
+    el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        fn(e);
+    });
+    el.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fn(e);
+    }, {passive: false});
+}
+
+function bindEvents() {
+    // Send button
+    tap(document.getElementById('sbtn'), function() {
+        var inp = document.getElementById('inp');
+        if (inp) doSend(inp.value);
+    });
+
+    // Mic button
+    tap(document.getElementById('micBtn'), function() {
+        toggleMic();
+    });
+
+    // Camera button
+    tap(document.getElementById('camBtn'), function() {
+        openCamera();
+    });
+
+    // Camera close
+    tap(document.getElementById('camClose'), function() {
+        closeCamera();
+    });
+
+    // Camera shutter
+    tap(document.getElementById('camShutter'), function() {
+        takePhoto();
+    });
+
+    // Camera flip
+    tap(document.getElementById('camFlip'), function() {
+        flipCamera();
+    });
+
+    // Voice toggle
+    tap(document.getElementById('voiceToggle'), function() {
+        voiceEnabled = !voiceEnabled;
+        stopSpeak();
+        var btn = document.getElementById('voiceToggle');
+        if (btn) btn.style.opacity = voiceEnabled ? '1' : '0.35';
+    });
+
+    // Enter key in textarea
+    var inp = document.getElementById('inp');
+    if (inp) {
+        inp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                doSend(this.value);
+            }
+        });
+        inp.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 90) + 'px';
+        });
+    }
+
+    // PILLS — each pill is a button, direct event
+    var pills = document.querySelectorAll('.pill[data-topic]');
+    pills.forEach(function(pill) {
+        tap(pill, function() {
+            doSend('Tell me about ' + pill.getAttribute('data-topic'));
+        });
+    });
+
+    // WELCOME GRID ITEMS — each is a button, direct event
+    var wgItems = document.querySelectorAll('.wgitem[data-msg]');
+    wgItems.forEach(function(item) {
+        tap(item, function() {
+            doSend(item.getAttribute('data-msg'));
+        });
+    });
+
+    // CHIPS — each chip is a button, direct event
+    var chips = document.querySelectorAll('.chip[data-msg]');
+    chips.forEach(function(chip) {
+        tap(chip, function() {
+            doSend(chip.getAttribute('data-msg'));
+        });
+    });
+}
+
+// ============================================
+// INIT — wait for DOM ready
+// ============================================
+function init() {
+    bindEvents();
+    setTimeout(doIntro, 1800);
+}
+
+// Guaranteed DOM ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
+})(); // end IIFE
 </script>
 </body>
 </html>
