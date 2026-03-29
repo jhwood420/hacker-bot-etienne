@@ -913,14 +913,19 @@ function sendMessage() {
 }
 
 function sendSuggestion(text) {
-    document.getElementById('userInput').value = text;
+    const input = document.getElementById('userInput');
+    input.value = text;
+    autoResize(input);
     sendMessage();
 }
 
 function insertTopic(topic) {
     const input = document.getElementById('userInput');
     input.value = `Tell me about ${topic}`;
+    autoResize(input);
     input.focus();
+    // Auto send immediately on mobile tap
+    setTimeout(() => sendMessage(), 100);
 }
 
 function handleKeyDown(event) {
