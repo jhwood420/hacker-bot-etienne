@@ -1,0 +1,5 @@
+# Secret config - never commit
+config.js
+*.ipa
+Etienne_iPhone.zip
+Etienne_Standalone.html
