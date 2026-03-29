@@ -840,7 +840,7 @@ function addMessage(content, isUser = false) {
     if (!isUser) {
         const icon = document.createElement('div');
         icon.className = 'bot-icon';
-        icon.textContent = BOT_AVATAR;
+        icon.innerHTML = '<img src="avatar.png" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" alt="Étienne">';
         bubbleWrap.appendChild(icon);
     }
 
@@ -872,7 +872,7 @@ function showTyping() {
 
     const icon = document.createElement('div');
     icon.className = 'bot-icon';
-    icon.textContent = BOT_AVATAR;
+    icon.innerHTML = '<img src="avatar.png" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" alt="Étienne">';
 
     const bubble = document.createElement('div');
     bubble.className = 'typing-bubble';
