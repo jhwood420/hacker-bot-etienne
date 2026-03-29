@@ -1,0 +1,34 @@
+{
+    "name": "Étienne Bot Source",
+    "identifier": "com.jhwood420.etienne.altstore",
+    "sourceURL": "https://jhwood420.github.io/hacker-bot-etienne/altstore.json",
+    "apps": [
+        {
+            "name": "Étienne",
+            "bundleIdentifier": "com.jhwood420.etienne",
+            "developerName": "jhwood420",
+            "subtitle": "Your French Hacking Assistant",
+            "version": "1.0.0",
+            "versionDate": "2024-03-29",
+            "versionDescription": "Initial release with iOS-style interface, French personality, and full ethical hacking knowledge base.",
+            "downloadURL": "https://jhwood420.github.io/hacker-bot-etienne/Etienne.ipa",
+            "localizedDescription": "Étienne is your personal French-personality coding and ethical hacking assistant. Features include:\n\n• Ethical Hacking roadmap\n• Python scripting\n• OSINT & Shodan recon\n• Tor education\n• Dark Web awareness\n• Network privacy\n• CTF challenges\n• SQL Injection & XSS\n• Metasploit guide\n• Linux commands\n• Cryptography",
+            "iconURL": "https://jhwood420.github.io/hacker-bot-etienne/avatar.png",
+            "tintColor": "0a84ff",
+            "size": 1500000,
+            "screenshotURLs": [
+                "https://jhwood420.github.io/hacker-bot-etienne/avatar.png"
+            ]
+        }
+    ],
+    "news": [
+        {
+            "title": "Étienne v1.0 Released!",
+            "identifier": "etienne-v1-release",
+            "caption": "Your French ethical hacking assistant is here!",
+            "tintColor": "0a84ff",
+            "date": "2024-03-29",
+            "notify": true
+        }
+    ]
+}
