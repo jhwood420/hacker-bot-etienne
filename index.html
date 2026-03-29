@@ -615,28 +615,26 @@ document.addEventListener('touchstart', unlockAudio, {once: true, passive: true}
 document.addEventListener('click', unlockAudio, {once: true, passive: true});
 
 // ============================================
-// GPT-4o + WEB SEARCH (Responses API)
+// GPT-4o + WEB SEARCH via Responses API
 // ============================================
 async function callGPT(msg, isVoice) {
     var key = (typeof window._ETIENNE_KEY !== 'undefined') ? window._ETIENNE_KEY : '';
     if (!key) return "Mon Dieu! No API key found. Please add your key to config.js 🇫🇷";
 
-    // Build system instruction
     var sysContent = SYSTEM;
     if (isVoice) {
         sysContent += "\n\nIMPORTANT — this is a VOICE query. Respond in 2-4 short, natural spoken sentences. No markdown. No bullet points. No code blocks. Speak naturally as if in conversation.";
     }
 
-    // Build input array from chat history + new message
+    // Build input for Responses API
     var inputMsgs = [];
-    // Add prior history (skip system, handled separately)
     for (var i = 1; i < chatHistory.length; i++) {
         inputMsgs.push({role: chatHistory[i].role, content: chatHistory[i].content});
     }
     inputMsgs.push({role: 'user', content: msg});
 
     try {
-        // Use Responses API with web_search_preview tool for live internet access
+        // Try Responses API with web search first
         var res = await fetch('https://api.openai.com/v1/responses', {
             method: 'POST',
             headers: {
@@ -648,21 +646,15 @@ async function callGPT(msg, isVoice) {
                 instructions: sysContent,
                 input: inputMsgs,
                 tools: [{type: 'web_search_preview'}],
-                max_output_tokens: isVoice ? 300 : 4000,
-                temperature: 0.85
+                max_output_tokens: isVoice ? 300 : 4000
             })
         });
 
         var data = await res.json();
 
-        if (data.error) {
-            // Fallback to Chat Completions if Responses API not available
-            return await callGPTFallback(msg, isVoice, sysContent, inputMsgs, key);
-        }
-
-        // Extract text from Responses API output
+        // Extract reply from Responses API format
         var reply = '';
-        if (data.output && Array.isArray(data.output)) {
+        if (!data.error && data.output && Array.isArray(data.output)) {
             for (var j = 0; j < data.output.length; j++) {
                 var item = data.output[j];
                 if (item.type === 'message' && item.content) {
@@ -675,19 +667,21 @@ async function callGPT(msg, isVoice) {
             }
         }
 
-        if (!reply) return await callGPTFallback(msg, isVoice, sysContent, inputMsgs, key);
+        if (reply) {
+            chatHistory.push({role:'user', content: msg});
+            chatHistory.push({role:'assistant', content: reply});
+            return reply;
+        }
 
-        // Commit to history
-        chatHistory.push({role:'user', content: msg});
-        chatHistory.push({role:'assistant', content: reply});
-        return reply;
+        // Fallback to Chat Completions API
+        return await callGPTFallback(msg, isVoice, sysContent, inputMsgs, key);
 
     } catch(e) {
-        return "Sacré bleu! Network error, mon ami. Check your connection 🇫🇷";
+        return await callGPTFallback(msg, isVoice, sysContent, inputMsgs, key);
     }
 }
 
-// Fallback to standard Chat Completions API
+// Fallback: standard Chat Completions (no web search)
 async function callGPTFallback(msg, isVoice, sysContent, inputMsgs, key) {
     try {
         var messages = [{role:'system', content: sysContent}].concat(inputMsgs);
@@ -762,19 +756,26 @@ async function speakOpenAI(text) {
     isSpeaking = true;
 
     try {
-        var res = await fetch('https://api.openai.com/v1/audio/speech', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + key
-            },
-            body: JSON.stringify({
-                model: 'tts-1',
-                input: clean,
-                voice: 'onyx',    // deep, rich masculine voice — perfect for Étienne
-                speed: 0.94
-            })
-        });
+        // Retry up to 3 times for rate limits
+        var res = null;
+        for (var attempt = 0; attempt < 3; attempt++) {
+            if (attempt > 0) await new Promise(function(r){ setTimeout(r, 2000 * attempt); });
+            res = await fetch('https://api.openai.com/v1/audio/speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + key
+                },
+                body: JSON.stringify({
+                    model: 'gpt-4o-mini-tts',
+                    input: clean,
+                    voice: 'onyx',
+                    instructions: 'Speak with a confident, charming French accent. Your tone is witty, warm and slightly mysterious. You are a French hacking expert named Étienne. Speak naturally and expressively.',
+                    speed: 0.94
+                })
+            });
+            if (res.status !== 429) break;
+        }
 
         if (!res.ok) { throw new Error('TTS HTTP ' + res.status); }
 
