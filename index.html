@@ -634,7 +634,20 @@ async function callGPT(msg, isVoice) {
     inputMsgs.push({role: 'user', content: msg});
 
     try {
-        // Try Responses API with web search first
+        // Try Grok first if key available
+        var grokKey = (typeof window._GROK_KEY !== 'undefined') ? window._GROK_KEY : '';
+        if (grokKey) {
+            setNavStatus('⚡ Asking Grok…');
+            var grokReply = await callGrok(msg, isVoice, sysContent, inputMsgs);
+            if (grokReply) {
+                chatHistory.push({role:'user', content: msg});
+                chatHistory.push({role:'assistant', content: grokReply});
+                return grokReply;
+            }
+        }
+
+        // Try Responses API with web search
+        setNavStatus('🌐 Searching web…');
         var res = await fetch('https://api.openai.com/v1/responses', {
             method: 'POST',
             headers: {
@@ -681,8 +694,49 @@ async function callGPT(msg, isVoice) {
     }
 }
 
+// ============================================
+// GROK (xAI) — real-time X/Twitter data
+// ============================================
+async function callGrok(msg, isVoice, sysContent, inputMsgs) {
+    var grokKey = (typeof window._GROK_KEY !== 'undefined') ? window._GROK_KEY : '';
+    if (!grokKey) return null;
+
+    try {
+        var messages = [{role:'system', content: sysContent}].concat(inputMsgs);
+        var res = await fetch('https://api.x.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + grokKey
+            },
+            body: JSON.stringify({
+                model: 'grok-3-latest',
+                messages: messages,
+                max_tokens: isVoice ? 300 : 4000,
+                temperature: 0.85
+            })
+        });
+        var data = await res.json();
+        if (data.error || !data.choices) return null;
+        return data.choices[0].message.content;
+    } catch(e) {
+        return null;
+    }
+}
+
 // Fallback: standard Chat Completions (no web search)
 async function callGPTFallback(msg, isVoice, sysContent, inputMsgs, key) {
+    // First try Grok
+    setNavStatus('⚡ Asking Grok…');
+    var grokReply = await callGrok(msg, isVoice, sysContent, inputMsgs);
+    if (grokReply) {
+        chatHistory.push({role:'user', content: msg});
+        chatHistory.push({role:'assistant', content: grokReply});
+        return grokReply;
+    }
+
+    // Fall back to GPT-4o
+    setNavStatus('🤖 Asking GPT-4o…');
     try {
         var messages = [{role:'system', content: sysContent}].concat(inputMsgs);
         var res = await fetch('https://api.openai.com/v1/chat/completions', {
