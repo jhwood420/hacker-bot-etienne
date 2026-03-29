@@ -2,7 +2,7 @@
     "name": "H4CK3R_BOT - Étienne",
     "short_name": "H4CK3R_BOT",
     "description": "Your French Ethical Hacking & Coding Assistant",
-    "start_url": "/index.html",
+    "start_url": "/hacker-bot-etienne/index.html",
     "display": "standalone",
     "background_color": "#0a0a0f",
     "theme_color": "#00ff41",
