@@ -2,161 +2,657 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Étienne — Hacking Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Étienne</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Étienne">
     <meta name="theme-color" content="#000000">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="stylesheet" href="style.css">
-    <style>
-        *{-webkit-tap-highlight-color:rgba(0,132,255,0.2);}
-        .pill,.gitem,.chip,#sbtn{cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;}
-        .pill:hover,.gitem:hover,.chip:hover{opacity:0.8;}
-    </style>
+    <link rel="manifest" href="manifest.json">
+<style>
+:root {
+    --safe-top: env(safe-area-inset-top, 47px);
+    --safe-bottom: env(safe-area-inset-bottom, 34px);
+    --accent: #0a84ff;
+    --green: #30d158;
+    --purple: #bf5af2;
+    --orange: #ff9f0a;
+    --red: #ff453a;
+    --bg: #000;
+    --bg2: #1c1c1e;
+    --bg3: #2c2c2e;
+    --text: #fff;
+    --muted: #8e8e93;
+    --border: rgba(255,255,255,0.1);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:rgba(10,132,255,0.15); }
+html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* STATUS BAR */
+.status-bar {
+    height: var(--safe-top);
+    min-height: 47px;
+    background: rgba(0,0,0,0.95);
+    flex-shrink: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 20px 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.status-time { font-size: 15px; font-weight: 700; }
+.status-icons { display: flex; gap: 6px; align-items: center; }
+.status-icons svg { width: 16px; height: 16px; fill: white; }
+
+/* NAV BAR */
+.nav {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px 10px;
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0;
+    gap: 12px;
+}
+.nav-back {
+    color: var(--accent);
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 70px;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+.nav-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    cursor: pointer;
+}
+.nav-avatar-wrap {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+.nav-avatar-wrap img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.online-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 10px;
+    height: 10px;
+    background: var(--green);
+    border-radius: 50%;
+    border: 2px solid #000;
+}
+.nav-name { font-size: 13px; font-weight: 600; }
+.nav-status { font-size: 11px; color: var(--muted); }
+.nav-actions { display: flex; gap: 10px; min-width: 70px; justify-content: flex-end; }
+.nav-icon-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg3);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+.nav-icon-btn svg { width: 16px; height: 16px; fill: var(--text); }
+
+/* TOPIC PILLS */
+.pills-wrap {
+    padding: 8px 12px;
+    overflow-x: auto;
+    display: flex;
+    gap: 6px;
+    background: var(--bg);
+    border-bottom: 0.5px solid var(--border);
+    flex-shrink: 0;
+    scrollbar-width: none;
+}
+.pills-wrap::-webkit-scrollbar { display: none; }
+.pill {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    background: var(--bg2);
+    border: 1px solid;
+    cursor: pointer;
+    touch-action: manipulation;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+}
+.pill.b { color: var(--accent); border-color: rgba(10,132,255,0.3); }
+.pill.g { color: var(--green); border-color: rgba(48,209,88,0.3); }
+.pill.p { color: var(--purple); border-color: rgba(191,90,242,0.3); }
+.pill.o { color: var(--orange); border-color: rgba(255,159,10,0.3); }
+
+/* CHAT */
+.chat {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.chat::-webkit-scrollbar { display: none; }
+
+/* WELCOME CARD */
+.wcard {
+    background: var(--bg2);
+    border-radius: 20px;
+    padding: 20px 16px;
+    margin-bottom: 8px;
+    border: 0.5px solid var(--border);
+    text-align: center;
+}
+.wcard-avatar {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--accent);
+    box-shadow: 0 0 20px rgba(10,132,255,0.4);
+    margin-bottom: 10px;
+}
+.wcard h2 { font-size: 19px; font-weight: 700; margin-bottom: 5px; }
+.wcard p { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+.wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wgitem {
+    background: var(--bg3);
+    border-radius: 14px;
+    padding: 12px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    touch-action: manipulation;
+    text-align: left;
+    line-height: 1.3;
+}
+.wgitem span { font-size: 20px; flex-shrink: 0; }
+
+/* MESSAGES */
+.mrow { display: flex; flex-direction: column; margin-bottom: 1px; }
+.mrow.u { align-items: flex-end; }
+.mrow.b { align-items: flex-start; }
+.mwrap { display: flex; align-items: flex-end; gap: 6px; max-width: 88%; }
+.mrow.u .mwrap { flex-direction: row-reverse; }
+.bicon { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.bubble {
+    padding: 9px 13px;
+    border-radius: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+    word-break: break-word;
+    animation: pop 0.18s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes pop { from { transform:scale(0.85); opacity:0; } to { transform:scale(1); opacity:1; } }
+.mrow.b .bubble { background: var(--bg2); border-bottom-left-radius: 4px; }
+.mrow.u .bubble { background: var(--accent); border-bottom-right-radius: 4px; }
+.bubble pre { background:rgba(0,0,0,0.5); border-radius:8px; padding:10px; overflow-x:auto; margin:8px 0; font-size:12px; color:var(--green); font-family:monospace; }
+.bubble code { background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px; font-size:12px; color:var(--green); font-family:monospace; }
+.bubble pre code { background:none; padding:0; }
+.bubble strong { color: #fff; }
+.mtime { font-size: 10px; color: var(--muted); margin: 2px 4px 6px; }
+.mrow.u .mtime { text-align: right; }
+
+/* TYPING */
+.trow { display: flex; align-items: flex-end; gap: 6px; margin-bottom: 4px; }
+.tbub { background: var(--bg2); border-radius: 18px; border-bottom-left-radius: 4px; padding: 11px 14px; display: flex; gap: 4px; align-items: center; }
+.tbub span { width: 7px; height: 7px; background: var(--muted); border-radius: 50%; animation: bn 1.3s infinite; }
+.tbub span:nth-child(2) { animation-delay: .15s; }
+.tbub span:nth-child(3) { animation-delay: .3s; }
+@keyframes bn { 0%,60%,100%{transform:translateY(0);opacity:.4;} 30%{transform:translateY(-5px);opacity:1;} }
+
+/* CAMERA PREVIEW */
+.cam-preview {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #000;
+    z-index: 1000;
+    flex-direction: column;
+}
+.cam-preview.active { display: flex; }
+.cam-preview video { flex: 1; object-fit: cover; width: 100%; }
+.cam-controls {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+    padding-bottom: calc(20px + var(--safe-bottom));
+    background: #000;
+}
+.cam-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    touch-action: manipulation;
+}
+.cam-shutter { background: #fff; width: 70px; height: 70px; border: 4px solid rgba(255,255,255,0.5); }
+.cam-close { background: var(--bg3); }
+
+/* INPUT */
+.input-area {
+    padding: 8px 10px;
+    padding-bottom: calc(8px + var(--safe-bottom));
+    background: rgba(0,0,0,0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 0.5px solid var(--border);
+    flex-shrink: 0;
+}
+.chips-row {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 7px;
+    scrollbar-width: none;
+}
+.chips-row::-webkit-scrollbar { display: none; }
+.chip {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    font-family: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+    flex-shrink: 0;
+}
+.irow {
+    display: flex;
+    align-items: flex-end;
+    gap: 7px;
+    background: var(--bg2);
+    border-radius: 22px;
+    padding: 5px 5px 5px 12px;
+    border: 0.5px solid var(--border);
+}
+#inp {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px;
+    resize: none;
+    max-height: 90px;
+    min-height: 22px;
+    line-height: 1.4;
+    scrollbar-width: none;
+    padding: 2px 0;
+}
+#inp::placeholder { color: var(--muted); }
+#inp::-webkit-scrollbar { display: none; }
+
+.ibtn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    flex-shrink: 0;
+    transition: all 0.15s;
+}
+#sbtn { background: var(--accent); }
+#sbtn svg { fill: white; width: 15px; height: 15px; }
+#micBtn { background: var(--bg3); }
+#micBtn svg { fill: var(--muted); width: 15px; height: 15px; }
+#micBtn.listening { background: var(--red); animation: pulse 1s infinite; }
+#micBtn.listening svg { fill: white; }
+#micBtn.speaking { background: var(--green); }
+#micBtn.speaking svg { fill: white; }
+#camBtn { background: var(--bg3); }
+#camBtn svg { fill: var(--muted); width: 15px; height: 15px; }
+@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+</style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
 <body>
 
-<div class="nav">
-    <div class="nav-left">← Chats</div>
-    <div class="nav-mid">
-        <img src="avatar.png" alt="Étienne">
-        <span>Étienne</span>
-        <small>● Active now</small>
+<!-- iOS Status Bar -->
+<div class="status-bar">
+    <span class="status-time" id="statusTime">9:41</span>
+    <div class="status-icons">
+        <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3a4.237 4.237 0 00-6 0zm-4-4l2 2a7.074 7.074 0 0110 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
     </div>
-    <div class="nav-right"></div>
 </div>
 
-<div class="pills" id="pills">
+<!-- Nav Bar -->
+<div class="nav">
+    <div class="nav-back" id="navBack">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none">
+            <path d="M8.5 1.5L1.5 8.5L8.5 15.5" stroke="#0a84ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Chats
+    </div>
+    <div class="nav-center" id="navCenter">
+        <div class="nav-avatar-wrap">
+            <img src="avatar.png" alt="Étienne">
+            <div class="online-dot"></div>
+        </div>
+        <div class="nav-name">Étienne</div>
+        <div class="nav-status">AI Hacking Assistant</div>
+    </div>
+    <div class="nav-actions">
+        <button class="nav-icon-btn" id="voiceToggle" title="Voice on/off">
+            <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        </button>
+        <button class="nav-icon-btn" id="camBtn" title="Camera">
+            <svg viewBox="0 0 24 24"><path d="M12 15.2a3.2 3.2 0 100-6.4 3.2 3.2 0 000 6.4z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+        </button>
+    </div>
+</div>
+
+<!-- Topic Pills -->
+<div class="pills-wrap" id="pillsWrap">
     <div class="pill b" data-topic="Python scripting">🐍 Python</div>
     <div class="pill g" data-topic="ethical hacking roadmap">🔐 Hacking</div>
-    <div class="pill p" data-topic="CTF challenges tips">🚩 CTF</div>
-    <div class="pill o" data-topic="OSINT tools Shodan">🔍 OSINT</div>
+    <div class="pill p" data-topic="CTF challenges">🚩 CTF</div>
+    <div class="pill o" data-topic="OSINT and Shodan">🔍 OSINT</div>
     <div class="pill b" data-topic="how Tor works">🧅 Tor</div>
-    <div class="pill g" data-topic="Linux commands hacking">🐧 Linux</div>
+    <div class="pill g" data-topic="Linux commands">🐧 Linux</div>
     <div class="pill p" data-topic="SQL injection">💉 SQLi</div>
-    <div class="pill o" data-topic="network privacy VPN proxychains">📡 Privacy</div>
+    <div class="pill o" data-topic="network privacy VPN">📡 Privacy</div>
     <div class="pill b" data-topic="Nmap scanning">🗺️ Nmap</div>
-    <div class="pill g" data-topic="cryptography encryption">🔑 Crypto</div>
-    <div class="pill p" data-topic="Metasploit framework">🔫 Metasploit</div>
-    <div class="pill o" data-topic="dark web safety awareness">🛡️ Dark Web</div>
+    <div class="pill g" data-topic="cryptography">🔑 Crypto</div>
+    <div class="pill p" data-topic="Metasploit">🔫 Metasploit</div>
+    <div class="pill o" data-topic="dark web safety">🛡️ Dark Web</div>
+    <div class="pill b" data-topic="XSS attacks">⚡ XSS</div>
+    <div class="pill g" data-topic="Bash scripting">📜 Bash</div>
 </div>
 
+<!-- Chat -->
 <div class="chat" id="chat">
-    <div class="card" id="welcomeCard">
-        <img src="avatar.png" alt="Étienne">
+    <div class="wcard" id="wcard">
+        <img src="avatar.png" class="wcard-avatar" alt="Étienne">
         <h2>Bonjour, mon ami! 👋</h2>
-        <p>I'm Étienne — your French AI hacking assistant powered by GPT-4o. Tap anything below!</p>
-        <div class="grid">
-            <div class="gitem" data-msg="How do I start ethical hacking?">🔐 Ethical Hacking</div>
-            <div class="gitem" data-msg="Write a Python port scanner">🐍 Python Code</div>
-            <div class="gitem" data-msg="OSINT tools and Shodan recon">🔍 OSINT & Recon</div>
-            <div class="gitem" data-msg="CTF challenges tips and tools">🚩 CTF Help</div>
-            <div class="gitem" data-msg="how Tor works onion architecture">🧅 Tor & Privacy</div>
-            <div class="gitem" data-msg="Explain SQL injection attack">💉 SQL Injection</div>
+        <p>I'm Étienne — your GPT-4o powered French hacking assistant. Tap below or speak to me!</p>
+        <div class="wgrid">
+            <div class="wgitem" data-msg="How do I start ethical hacking?"><span>🔐</span>Ethical Hacking</div>
+            <div class="wgitem" data-msg="Write a Python port scanner"><span>🐍</span>Python Code</div>
+            <div class="wgitem" data-msg="OSINT tools and Shodan recon"><span>🔍</span>OSINT & Recon</div>
+            <div class="wgitem" data-msg="CTF challenges tips and tools"><span>🚩</span>CTF Help</div>
+            <div class="wgitem" data-msg="how Tor works onion architecture"><span>🧅</span>Tor & Privacy</div>
+            <div class="wgitem" data-msg="Explain SQL injection"><span>💉</span>SQL Injection</div>
         </div>
     </div>
 </div>
 
-<div class="bottom">
-    <div class="chips" id="chips">
+<!-- Camera Preview -->
+<div class="cam-preview" id="camPreview">
+    <video id="camVideo" autoplay playsinline muted></video>
+    <div class="cam-controls">
+        <button class="cam-btn cam-close" id="camClose">✕</button>
+        <button class="cam-btn cam-shutter" id="camShutter">📷</button>
+        <button class="cam-btn" id="camFlip" style="background:#2c2c2e;">🔄</button>
+    </div>
+</div>
+
+<!-- Input -->
+<div class="input-area">
+    <div class="chips-row" id="chipsRow">
         <button class="chip" data-msg="How do I start ethical hacking?">🔐 Start hacking</button>
         <button class="chip" data-msg="Write a Python port scanner">🐍 Port scanner</button>
-        <button class="chip" data-msg="Common Linux commands for hackers">🐧 Linux tips</button>
+        <button class="chip" data-msg="Common Linux commands">🐧 Linux</button>
         <button class="chip" data-msg="OSINT tools and Shodan recon">🔍 OSINT</button>
-        <button class="chip" data-msg="network privacy VPN proxychains anonymity">📡 Stay private</button>
+        <button class="chip" data-msg="network privacy VPN proxychains">📡 Privacy</button>
     </div>
     <div class="irow">
+        <button class="ibtn" id="micBtn" title="Voice input">
+            <svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 15.2 14.47 17 12 17s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V21c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
+        </button>
         <textarea id="inp" placeholder="Message Étienne..." rows="1"></textarea>
-        <button id="sbtn">
+        <button class="ibtn" id="sbtn">
             <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
         </button>
     </div>
 </div>
 
-<!-- Load API key from config (not in GitHub) -->
+<!-- Config & Scripts -->
 <script src="config.js"></script>
-
 <script>
 // ============================================
-// GPT-4o Integration
+// GPT-4o
 // ============================================
-const SYSTEM_PROMPT = `You are Étienne, a charming French AI assistant specializing in coding and ethical hacking.
+const SYSTEM_PROMPT = `You are Étienne, a charming French AI assistant for coding and ethical hacking.
+Personality: witty, confident, charmingly French. Use phrases like "Mon ami", "Ooh là là", "Magnifique!", "Voilà!", "Sacré bleu", "Mais bien sûr!". End with fun French signoffs.
+Expertise: ethical hacking, Python, JavaScript, Bash, network security, CTF, OSINT, SQLi, XSS, Metasploit, Nmap, Burp Suite, Linux, crypto, Tor, dark web awareness, privacy, web dev.
+Always emphasize ethical & legal use. Format code in markdown blocks. Never assist with illegal activities.`;
 
-Your personality:
-- You are witty, confident and charmingly French
-- Sprinkle French phrases: "Mon ami", "Ooh là là", "Mais bien sûr!", "Voilà!", "Magnifique!", "Sacré bleu"
-- End responses with charming signoffs like "— Voilà, mon ami 🥐" or "— Magnifique, non? 💋"
-- Sophisticated, smooth tone
-
-Your expertise: ethical hacking, penetration testing, Python, JavaScript, Bash, network security, CTF, OSINT, SQLi, XSS, Metasploit, Nmap, Burp Suite, Linux, cryptography, Tor, dark web awareness, network privacy, web development.
-
-Rules:
-- Always emphasize ethical use and legal authorization
-- Format code in markdown code blocks
-- Be helpful, charming and clear
-- Never assist with illegal activities`;
-
-const chatHistory = [{role:'system', content: SYSTEM_PROMPT}];
+const chatHistory = [{role:'system', content:SYSTEM_PROMPT}];
 
 async function callGPT(msg) {
     const key = window._ETIENNE_KEY || '';
-    if (!key) return "Mon Dieu! No API key found. Please add your OpenAI key to config.js 🇫🇷";
-    
-    chatHistory.push({role:'user', content: msg});
+    if (!key) return "Mon Dieu! No API key found in config.js 🇫🇷";
+    chatHistory.push({role:'user', content:msg});
     try {
         const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + key
-            },
-            body: JSON.stringify({
-                model: 'gpt-4o',
-                messages: chatHistory,
-                max_tokens: 1000,
-                temperature: 0.8
-            })
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+            body:JSON.stringify({model:'gpt-4o', messages:chatHistory, max_tokens:1000, temperature:0.8})
         });
         const data = await res.json();
-        if (data.error) return "Mon Dieu! " + data.error.message;
+        if (data.error) return "Mon Dieu! "+data.error.message;
         const reply = data.choices[0].message.content;
-        chatHistory.push({role:'assistant', content: reply});
-        return formatMD(reply);
-    } catch(e) {
-        return "Sacré bleu! Network error, mon ami. Try again! 🇫🇷";
-    }
+        chatHistory.push({role:'assistant', content:reply});
+        return fmtMD(reply);
+    } catch(e) { return "Sacré bleu! Network error, mon ami 🇫🇷"; }
 }
 
-function formatMD(t) {
-    t = t.replace(/```(\w+)?\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-    t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
-    t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    t = t.replace(/\n/g, '<br>');
+function fmtMD(t) {
+    t = t.replace(/```(\w+)?\n?([\s\S]*?)```/g,'<pre><code>$2</code></pre>');
+    t = t.replace(/`([^`]+)`/g,'<code>$1</code>');
+    t = t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    t = t.replace(/\*(.*?)\*/g,'<em>$1</em>');
+    t = t.replace(/\n/g,'<br>');
     return t;
 }
 
 // ============================================
-// Chat UI
+// VOICE - Text to Speech
 // ============================================
-var BOT_IMG = '<img src="avatar.png" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="E">';
+var voiceEnabled = true;
+var isSpeaking = false;
+var selectedVoice = null;
 
-function getTime() {
-    return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+function loadVoices() {
+    var voices = window.speechSynthesis.getVoices();
+    var pref = ['Google UK English Male','Daniel','Alex','Microsoft David - English (United States)','Fred'];
+    for (var i=0;i<pref.length;i++) {
+        var v = voices.find(function(v){return v.name===pref[i];});
+        if (v) { selectedVoice=v; break; }
+    }
+    if (!selectedVoice) selectedVoice = voices.find(function(v){return v.lang.startsWith('en');}) || voices[0];
 }
+
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
+function speak(text) {
+    if (!voiceEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    var clean = text.replace(/<[^>]*>/g,'').replace(/```[\s\S]*?```/g,'code block').replace(/&/g,'and').replace(/</g,'<').replace(/>/g,'>');
+    if (clean.length > 500) clean = clean.substring(0,500)+'...';
+    var u = new SpeechSynthesisUtterance(clean);
+    if (selectedVoice) u.voice = selectedVoice;
+    u.rate = 0.92; u.pitch = 0.88; u.volume = 1.0;
+    isSpeaking = true;
+    updateMicState('speaking');
+    u.onend = function(){ isSpeaking=false; updateMicState('idle'); };
+    window.speechSynthesis.speak(u);
+}
+
+function stopSpeak() { window.speechSynthesis.cancel(); isSpeaking=false; updateMicState('idle'); }
+
+// ============================================
+// VOICE - Speech Recognition (Microphone)
+// ============================================
+var recognition = null;
+var isListening = false;
+
+function initRecognition() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    recognition = new SR();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.onstart = function(){ isListening=true; updateMicState('listening'); };
+    recognition.onresult = function(e) {
+        var transcript = Array.from(e.results).map(function(r){return r[0].transcript;}).join('');
+        document.getElementById('inp').value = transcript;
+        if (e.results[e.results.length-1].isFinal) {
+            isListening = false;
+            updateMicState('idle');
+            doSend(transcript);
+        }
+    };
+    recognition.onerror = function(){ isListening=false; updateMicState('idle'); };
+    recognition.onend = function(){ isListening=false; updateMicState('idle'); };
+}
+
+function updateMicState(state) {
+    var btn = document.getElementById('micBtn');
+    btn.className = 'ibtn' + (state==='listening'?' listening':state==='speaking'?' speaking':'');
+}
+
+function toggleMic() {
+    if (isSpeaking) { stopSpeak(); return; }
+    if (!recognition) initRecognition();
+    if (!recognition) { alert('Voice not supported on this browser'); return; }
+    if (isListening) { recognition.stop(); }
+    else { stopSpeak(); recognition.start(); }
+}
+
+// ============================================
+// CAMERA
+// ============================================
+var camStream = null;
+var facingMode = 'environment';
+
+async function openCamera() {
+    try {
+        camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:facingMode}, audio:false});
+        document.getElementById('camVideo').srcObject = camStream;
+        document.getElementById('camPreview').classList.add('active');
+    } catch(e) { alert('Camera access denied. Please allow camera in Safari settings.'); }
+}
+
+function closeCamera() {
+    if (camStream) { camStream.getTracks().forEach(function(t){t.stop();}); camStream=null; }
+    document.getElementById('camPreview').classList.remove('active');
+}
+
+function flipCamera() {
+    facingMode = facingMode==='environment'?'user':'environment';
+    closeCamera(); openCamera();
+}
+
+function takePhoto() {
+    var video = document.getElementById('camVideo');
+    var canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video,0,0);
+    var imgData = canvas.toDataURL('image/jpeg',0.8);
+    closeCamera();
+    // Show photo in chat
+    var chat = document.getElementById('chat');
+    var row = document.createElement('div');
+    row.className = 'mrow u';
+    var wrap = document.createElement('div');
+    wrap.className = 'mwrap';
+    var bub = document.createElement('div');
+    bub.className = 'bubble';
+    bub.style.padding = '4px';
+    bub.innerHTML = '<img src="'+imgData+'" style="max-width:200px;border-radius:12px;display:block;">';
+    wrap.appendChild(bub);
+    row.appendChild(wrap);
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+    doSend('I just took a photo. Can you help me analyze what I should look for from a security perspective?');
+}
+
+// ============================================
+// CLOCK
+// ============================================
+function updateClock() {
+    var now = new Date();
+    var h = now.getHours(), m = now.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    document.getElementById('statusTime').textContent = h + ':' + (m<10?'0':'')+m;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// ============================================
+// CHAT UI
+// ============================================
+var BICO = '<img src="avatar.png" class="bicon" alt="E">';
+
+function getTime() { return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 
 function addMsg(text, isUser) {
     var chat = document.getElementById('chat');
     var row = document.createElement('div');
-    row.className = 'msg-row ' + (isUser ? 'u' : 'b');
+    row.className = 'mrow '+(isUser?'u':'b');
     var wrap = document.createElement('div');
-    wrap.className = 'bwrap';
-    if (!isUser) { var ic = document.createElement('div'); ic.innerHTML = BOT_IMG; wrap.appendChild(ic.firstChild); }
+    wrap.className = 'mwrap';
+    if (!isUser) { var ic=document.createElement('div'); ic.innerHTML=BICO; wrap.appendChild(ic.firstChild); }
     var bub = document.createElement('div');
     bub.className = 'bubble';
-    if (isUser) { bub.textContent = text; } else { bub.innerHTML = text; }
+    if (isUser) bub.textContent=text; else bub.innerHTML=text;
     wrap.appendChild(bub);
     row.appendChild(wrap);
     var t = document.createElement('div');
@@ -170,60 +666,58 @@ function addMsg(text, isUser) {
 function showTyping() {
     var chat = document.getElementById('chat');
     var d = document.createElement('div');
-    d.className = 'tdots'; d.id = 'typing';
-    d.innerHTML = BOT_IMG + '<div class="tb"><span></span><span></span><span></span></div>';
+    d.className = 'trow'; d.id = 'typing';
+    d.innerHTML = BICO+'<div class="tbub"><span></span><span></span><span></span></div>';
     chat.appendChild(d);
     chat.scrollTop = chat.scrollHeight;
 }
 
-function hideTyping() {
-    var t = document.getElementById('typing');
-    if (t) t.remove();
-}
+function hideTyping() { var t=document.getElementById('typing'); if(t)t.remove(); }
 
 async function doSend(text) {
-    if (!text || !text.trim()) return;
-    var chips = document.getElementById('chips');
-    if (chips) chips.style.display = 'none';
+    if (!text||!text.trim()) return;
+    var cr = document.getElementById('chipsRow');
+    if (cr) cr.style.display='none';
+    stopSpeak();
     addMsg(text, true);
     var inp = document.getElementById('inp');
-    inp.value = '';
-    inp.style.height = 'auto';
+    inp.value=''; inp.style.height='auto';
     showTyping();
     var reply = await callGPT(text);
     hideTyping();
     addMsg(reply, false);
+    speak(reply);
 }
 
-// Event Listeners
-document.getElementById('sbtn').addEventListener('click', function() {
-    doSend(document.getElementById('inp').value.trim());
+// ============================================
+// INTRO SPEECH on load
+// ============================================
+window.addEventListener('load', function(){
+    setTimeout(function(){
+        speak("Bonjour mon ami! I am Étienne, your personal French hacking and coding assistant, powered by G P T 4. I am here to help you with ethical hacking, Python, cybersecurity, and much more. Ask me anything — I never disappoint! Voilà!");
+    }, 1500);
 });
 
-document.getElementById('inp').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(this.value.trim()); }
+// ============================================
+// EVENT LISTENERS
+// ============================================
+document.getElementById('sbtn').addEventListener('click', function(){ doSend(document.getElementById('inp').value.trim()); });
+document.getElementById('inp').addEventListener('keydown', function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend(this.value.trim());} });
+document.getElementById('inp').addEventListener('input', function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,90)+'px'; });
+document.getElementById('micBtn').addEventListener('click', toggleMic);
+document.getElementById('camBtn').addEventListener('click', openCamera);
+document.getElementById('camClose').addEventListener('click', closeCamera);
+document.getElementById('camShutter').addEventListener('click', takePhoto);
+document.getElementById('camFlip').addEventListener('click', flipCamera);
+document.getElementById('voiceToggle').addEventListener('click', function(){
+    voiceEnabled = !voiceEnabled;
+    stopSpeak();
+    this.style.opacity = voiceEnabled ? '1' : '0.4';
+    this.title = voiceEnabled ? 'Voice on' : 'Voice off';
 });
-
-document.getElementById('inp').addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
-});
-
-document.getElementById('pills').addEventListener('click', function(e) {
-    var p = e.target.closest('[data-topic]');
-    if (p) doSend('Tell me about ' + p.getAttribute('data-topic'));
-});
-
-document.getElementById('welcomeCard').addEventListener('click', function(e) {
-    var p = e.target.closest('[data-msg]');
-    if (p) doSend(p.getAttribute('data-msg'));
-});
-
-document.getElementById('chips').addEventListener('click', function(e) {
-    var p = e.target.closest('[data-msg]');
-    if (p) doSend(p.getAttribute('data-msg'));
-});
+document.getElementById('pillsWrap').addEventListener('click', function(e){ var p=e.target.closest('[data-topic]'); if(p) doSend('Tell me about '+p.getAttribute('data-topic')); });
+document.getElementById('wcard').addEventListener('click', function(e){ var p=e.target.closest('[data-msg]'); if(p) doSend(p.getAttribute('data-msg')); });
+document.getElementById('chipsRow').addEventListener('click', function(e){ var p=e.target.closest('[data-msg]'); if(p) doSend(p.getAttribute('data-msg')); });
 </script>
-
 </body>
 </html>
