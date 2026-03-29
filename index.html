@@ -615,25 +615,82 @@ document.addEventListener('touchstart', unlockAudio, {once: true, passive: true}
 document.addEventListener('click', unlockAudio, {once: true, passive: true});
 
 // ============================================
-// GPT-4o API — max_tokens: 4000
+// GPT-4o + WEB SEARCH (Responses API)
 // ============================================
 async function callGPT(msg, isVoice) {
     var key = (typeof window._ETIENNE_KEY !== 'undefined') ? window._ETIENNE_KEY : '';
     if (!key) return "Mon Dieu! No API key found. Please add your key to config.js 🇫🇷";
 
-    // Clone history and optionally add voice instruction
-    var messages = chatHistory.map(function(m, i) {
-        if (i === 0 && isVoice) {
-            return {
-                role: 'system',
-                content: m.content + "\n\nIMPORTANT — this is a VOICE query. Respond in 2-4 short, natural spoken sentences. No markdown. No bullet points. No code blocks. Speak naturally as if in conversation."
-            };
-        }
-        return m;
-    });
-    messages.push({role: 'user', content: msg});
+    // Build system instruction
+    var sysContent = SYSTEM;
+    if (isVoice) {
+        sysContent += "\n\nIMPORTANT — this is a VOICE query. Respond in 2-4 short, natural spoken sentences. No markdown. No bullet points. No code blocks. Speak naturally as if in conversation.";
+    }
+
+    // Build input array from chat history + new message
+    var inputMsgs = [];
+    // Add prior history (skip system, handled separately)
+    for (var i = 1; i < chatHistory.length; i++) {
+        inputMsgs.push({role: chatHistory[i].role, content: chatHistory[i].content});
+    }
+    inputMsgs.push({role: 'user', content: msg});
 
     try {
+        // Use Responses API with web_search_preview tool for live internet access
+        var res = await fetch('https://api.openai.com/v1/responses', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + key
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o',
+                instructions: sysContent,
+                input: inputMsgs,
+                tools: [{type: 'web_search_preview'}],
+                max_output_tokens: isVoice ? 300 : 4000,
+                temperature: 0.85
+            })
+        });
+
+        var data = await res.json();
+
+        if (data.error) {
+            // Fallback to Chat Completions if Responses API not available
+            return await callGPTFallback(msg, isVoice, sysContent, inputMsgs, key);
+        }
+
+        // Extract text from Responses API output
+        var reply = '';
+        if (data.output && Array.isArray(data.output)) {
+            for (var j = 0; j < data.output.length; j++) {
+                var item = data.output[j];
+                if (item.type === 'message' && item.content) {
+                    for (var k = 0; k < item.content.length; k++) {
+                        if (item.content[k].type === 'output_text') {
+                            reply += item.content[k].text;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!reply) return await callGPTFallback(msg, isVoice, sysContent, inputMsgs, key);
+
+        // Commit to history
+        chatHistory.push({role:'user', content: msg});
+        chatHistory.push({role:'assistant', content: reply});
+        return reply;
+
+    } catch(e) {
+        return "Sacré bleu! Network error, mon ami. Check your connection 🇫🇷";
+    }
+}
+
+// Fallback to standard Chat Completions API
+async function callGPTFallback(msg, isVoice, sysContent, inputMsgs, key) {
+    try {
+        var messages = [{role:'system', content: sysContent}].concat(inputMsgs);
         var res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -648,9 +705,8 @@ async function callGPT(msg, isVoice) {
             })
         });
         var data = await res.json();
-        if (data.error) return "Mon Dieu! Error: " + data.error.message;
+        if (data.error) return "Mon Dieu! API Error: " + data.error.message;
         var reply = data.choices[0].message.content;
-        // Commit to real history
         chatHistory.push({role:'user', content: msg});
         chatHistory.push({role:'assistant', content: reply});
         return reply;
@@ -1106,7 +1162,7 @@ async function doSend(text, isVoice) {
     var inp = document.getElementById('inp');
     if (inp) { inp.value = ''; inp.style.height = 'auto'; }
 
-    setNavStatus('⏳ Thinking…');
+    setNavStatus('🌐 Searching…');
     showTyping();
 
     var reply = await callGPT(text, isVoice);
