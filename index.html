@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Étienne — Hacking Assistant</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Étienne">
+    <meta name="theme-color" content="#000000">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        *{-webkit-tap-highlight-color:rgba(0,132,255,0.2);}
+        .pill,.gitem,.chip,#sbtn{cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;}
+        .pill:hover,.gitem:hover,.chip:hover{opacity:0.8;}
+    </style>
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+</head>
+<body>
+
+<div class="nav">
+    <div class="nav-left">← Chats</div>
+    <div class="nav-mid">
+        <img src="avatar.png" alt="Étienne">
+        <span>Étienne</span>
+        <small>● Active now</small>
+    </div>
+    <div class="nav-right"></div>
+</div>
+
+<div class="pills" id="pills">
+    <div class="pill b" data-topic="Python scripting">🐍 Python</div>
+    <div class="pill g" data-topic="ethical hacking roadmap">🔐 Hacking</div>
+    <div class="pill p" data-topic="CTF challenges tips">🚩 CTF</div>
+    <div class="pill o" data-topic="OSINT tools Shodan">🔍 OSINT</div>
+    <div class="pill b" data-topic="how Tor works">🧅 Tor</div>
+    <div class="pill g" data-topic="Linux commands hacking">🐧 Linux</div>
+    <div class="pill p" data-topic="SQL injection">💉 SQLi</div>
+    <div class="pill o" data-topic="network privacy VPN proxychains">📡 Privacy</div>
+    <div class="pill b" data-topic="Nmap scanning">🗺️ Nmap</div>
+    <div class="pill g" data-topic="cryptography encryption">🔑 Crypto</div>
+    <div class="pill p" data-topic="Metasploit framework">🔫 Metasploit</div>
+    <div class="pill o" data-topic="dark web safety awareness">🛡️ Dark Web</div>
+</div>
+
+<div class="chat" id="chat">
+    <div class="card" id="welcomeCard">
+        <img src="avatar.png" alt="Étienne">
+        <h2>Bonjour, mon ami! 👋</h2>
+        <p>I'm Étienne — your French AI hacking assistant powered by GPT-4o. Tap anything below!</p>
+        <div class="grid">
+            <div class="gitem" data-msg="How do I start ethical hacking?">🔐 Ethical Hacking</div>
+            <div class="gitem" data-msg="Write a Python port scanner">🐍 Python Code</div>
+            <div class="gitem" data-msg="OSINT tools and Shodan recon">🔍 OSINT & Recon</div>
+            <div class="gitem" data-msg="CTF challenges tips and tools">🚩 CTF Help</div>
+            <div class="gitem" data-msg="how Tor works onion architecture">🧅 Tor & Privacy</div>
+            <div class="gitem" data-msg="Explain SQL injection attack">💉 SQL Injection</div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom">
+    <div class="chips" id="chips">
+        <button class="chip" data-msg="How do I start ethical hacking?">🔐 Start hacking</button>
+        <button class="chip" data-msg="Write a Python port scanner">🐍 Port scanner</button>
+        <button class="chip" data-msg="Common Linux commands for hackers">🐧 Linux tips</button>
+        <button class="chip" data-msg="OSINT tools and Shodan recon">🔍 OSINT</button>
+        <button class="chip" data-msg="network privacy VPN proxychains anonymity">📡 Stay private</button>
+    </div>
+    <div class="irow">
+        <textarea id="inp" placeholder="Message Étienne..." rows="1"></textarea>
+        <button id="sbtn">
+            <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+        </button>
+    </div>
+</div>
+
+<!-- Load API key from config (not in GitHub) -->
+<script src="config.js"></script>
+
+<script>
+// ============================================
+// GPT-4o Integration
+// ============================================
+const SYSTEM_PROMPT = `You are Étienne, a charming French AI assistant specializing in coding and ethical hacking.
+
+Your personality:
+- You are witty, confident and charmingly French
+- Sprinkle French phrases: "Mon ami", "Ooh là là", "Mais bien sûr!", "Voilà!", "Magnifique!", "Sacré bleu"
+- End responses with charming signoffs like "— Voilà, mon ami 🥐" or "— Magnifique, non? 💋"
+- Sophisticated, smooth tone
+
+Your expertise: ethical hacking, penetration testing, Python, JavaScript, Bash, network security, CTF, OSINT, SQLi, XSS, Metasploit, Nmap, Burp Suite, Linux, cryptography, Tor, dark web awareness, network privacy, web development.
+
+Rules:
+- Always emphasize ethical use and legal authorization
+- Format code in markdown code blocks
+- Be helpful, charming and clear
+- Never assist with illegal activities`;
+
+const chatHistory = [{role:'system', content: SYSTEM_PROMPT}];
+
+async function callGPT(msg) {
+    const key = window._ETIENNE_KEY || '';
+    if (!key) return "Mon Dieu! No API key found. Please add your OpenAI key to config.js 🇫🇷";
+    
+    chatHistory.push({role:'user', content: msg});
+    try {
+        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + key
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o',
+                messages: chatHistory,
+                max_tokens: 1000,
+                temperature: 0.8
+            })
+        });
+        const data = await res.json();
+        if (data.error) return "Mon Dieu! " + data.error.message;
+        const reply = data.choices[0].message.content;
+        chatHistory.push({role:'assistant', content: reply});
+        return formatMD(reply);
+    } catch(e) {
+        return "Sacré bleu! Network error, mon ami. Try again! 🇫🇷";
+    }
+}
+
+function formatMD(t) {
+    t = t.replace(/```(\w+)?\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+    t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+    t = t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    t = t.replace(/\n/g, '<br>');
+    return t;
+}
+
+// ============================================
+// Chat UI
+// ============================================
+var BOT_IMG = '<img src="avatar.png" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="E">';
+
+function getTime() {
+    return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+function addMsg(text, isUser) {
+    var chat = document.getElementById('chat');
+    var row = document.createElement('div');
+    row.className = 'msg-row ' + (isUser ? 'u' : 'b');
+    var wrap = document.createElement('div');
+    wrap.className = 'bwrap';
+    if (!isUser) { var ic = document.createElement('div'); ic.innerHTML = BOT_IMG; wrap.appendChild(ic.firstChild); }
+    var bub = document.createElement('div');
+    bub.className = 'bubble';
+    if (isUser) { bub.textContent = text; } else { bub.innerHTML = text; }
+    wrap.appendChild(bub);
+    row.appendChild(wrap);
+    var t = document.createElement('div');
+    t.className = 'mtime';
+    t.textContent = getTime();
+    row.appendChild(t);
+    chat.appendChild(row);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+    var chat = document.getElementById('chat');
+    var d = document.createElement('div');
+    d.className = 'tdots'; d.id = 'typing';
+    d.innerHTML = BOT_IMG + '<div class="tb"><span></span><span></span><span></span></div>';
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+function hideTyping() {
+    var t = document.getElementById('typing');
+    if (t) t.remove();
+}
+
+async function doSend(text) {
+    if (!text || !text.trim()) return;
+    var chips = document.getElementById('chips');
+    if (chips) chips.style.display = 'none';
+    addMsg(text, true);
+    var inp = document.getElementById('inp');
+    inp.value = '';
+    inp.style.height = 'auto';
+    showTyping();
+    var reply = await callGPT(text);
+    hideTyping();
+    addMsg(reply, false);
+}
+
+// Event Listeners
+document.getElementById('sbtn').addEventListener('click', function() {
+    doSend(document.getElementById('inp').value.trim());
+});
+
+document.getElementById('inp').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(this.value.trim()); }
+});
+
+document.getElementById('inp').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+document.getElementById('pills').addEventListener('click', function(e) {
+    var p = e.target.closest('[data-topic]');
+    if (p) doSend('Tell me about ' + p.getAttribute('data-topic'));
+});
+
+document.getElementById('welcomeCard').addEventListener('click', function(e) {
+    var p = e.target.closest('[data-msg]');
+    if (p) doSend(p.getAttribute('data-msg'));
+});
+
+document.getElementById('chips').addEventListener('click', function(e) {
+    var p = e.target.closest('[data-msg]');
+    if (p) doSend(p.getAttribute('data-msg'));
+});
+</script>
+
+</body>
+</html>
