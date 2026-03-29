@@ -1,6 +1,6 @@
 // ============================================
-// H4CK3R_BOT - French Charming Personality
-// Coding & Ethical Hacking Assistant
+// ÉTIENNE - French Charming AI Assistant
+// iOS-Style Coding & Ethical Hacking Bot
 // ============================================
 
 const BOT_NAME = "Étienne";
@@ -821,7 +821,7 @@ function getResponse(input) {
 }
 
 // ============================================
-// CHAT INTERFACE
+// CHAT INTERFACE - iOS Style
 // ============================================
 
 function getTime() {
@@ -831,54 +831,56 @@ function getTime() {
 function addMessage(content, isUser = false) {
     const chatArea = document.getElementById('chatArea');
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+    const row = document.createElement('div');
+    row.className = `message-row ${isUser ? 'user' : 'bot'}`;
 
-    const avatar = document.createElement('div');
-    avatar.className = `avatar ${isUser ? 'user-avatar' : 'bot-avatar'}`;
-    avatar.textContent = isUser ? '👤' : BOT_AVATAR;
+    const bubbleWrap = document.createElement('div');
+    bubbleWrap.className = 'bubble-wrap';
 
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
+    if (!isUser) {
+        const icon = document.createElement('div');
+        icon.className = 'bot-icon';
+        icon.textContent = BOT_AVATAR;
+        bubbleWrap.appendChild(icon);
+    }
 
     const bubble = document.createElement('div');
-    bubble.className = 'message-bubble';
+    bubble.className = 'bubble';
     if (isUser) {
         bubble.textContent = content;
     } else {
         bubble.innerHTML = content;
     }
 
+    bubbleWrap.appendChild(bubble);
+    row.appendChild(bubbleWrap);
+
     const time = document.createElement('div');
     time.className = 'message-time';
-    time.textContent = `${isUser ? 'You' : BOT_NAME} • ${getTime()}`;
+    time.textContent = getTime();
+    row.appendChild(time);
 
-    contentDiv.appendChild(bubble);
-    contentDiv.appendChild(time);
-    messageDiv.appendChild(avatar);
-    messageDiv.appendChild(contentDiv);
-    chatArea.appendChild(messageDiv);
-
+    chatArea.appendChild(row);
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 function showTyping() {
     const chatArea = document.getElementById('chatArea');
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message bot typing-indicator';
-    typingDiv.id = 'typingIndicator';
+    const row = document.createElement('div');
+    row.className = 'typing-row';
+    row.id = 'typingIndicator';
 
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar bot-avatar';
-    avatar.textContent = BOT_AVATAR;
+    const icon = document.createElement('div');
+    icon.className = 'bot-icon';
+    icon.textContent = BOT_AVATAR;
 
-    const dotsDiv = document.createElement('div');
-    dotsDiv.className = 'typing-dots';
-    dotsDiv.innerHTML = '<span></span><span></span><span></span>';
+    const bubble = document.createElement('div');
+    bubble.className = 'typing-bubble';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
 
-    typingDiv.appendChild(avatar);
-    typingDiv.appendChild(dotsDiv);
-    chatArea.appendChild(typingDiv);
+    row.appendChild(icon);
+    row.appendChild(bubble);
+    chatArea.appendChild(row);
     chatArea.scrollTop = chatArea.scrollHeight;
 }
 
@@ -893,7 +895,8 @@ function sendMessage() {
     if (!text) return;
 
     // Hide suggestions after first message
-    document.getElementById('suggestions').style.display = 'none';
+    const suggestionsRow = document.getElementById('suggestionsRow');
+    if (suggestionsRow) suggestionsRow.style.display = 'none';
 
     addMessage(text, true);
     input.value = '';
@@ -901,7 +904,6 @@ function sendMessage() {
 
     showTyping();
 
-    // Simulate typing delay
     const delay = Math.floor(Math.random() * 800) + 600;
     setTimeout(() => {
         hideTyping();
@@ -930,41 +932,5 @@ function handleKeyDown(event) {
 
 function autoResize(textarea) {
     textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
 }
-
-// ============================================
-// MATRIX RAIN BACKGROUND
-// ============================================
-
-const canvas = document.getElementById('matrix-bg');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const chars = '01アイウエオカキクケコサシスセソABCDEFGHIJKLMNOPQRSTUVWXYZ{}[]<>/\\|';
-const fontSize = 14;
-const cols = Math.floor(canvas.width / fontSize);
-const drops = Array(cols).fill(1);
-
-function drawMatrix() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#00ff41';
-    ctx.font = `${fontSize}px Courier New`;
-
-    drops.forEach((y, i) => {
-        const char = chars[Math.floor(Math.random() * chars.length)];
-        ctx.fillText(char, i * fontSize, y * fontSize);
-        if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-    });
-}
-
-setInterval(drawMatrix, 50);
-
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
