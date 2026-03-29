@@ -119,7 +119,7 @@ body {
 .nav-status { font-size: 11px; color: var(--muted); }
 .nav-actions { display: flex; gap: 8px; min-width: 60px; justify-content: flex-end; }
 
-/* NAV BUTTONS - ULTRA CLICKABLE */
+/* NAV BUTTONS */
 .nav-icon-btn {
     width: 34px; height: 34px;
     border-radius: 50%;
@@ -138,9 +138,11 @@ body {
     outline: none;
     -webkit-user-select: none;
     user-select: none;
+    transition: opacity 0.2s;
 }
 .nav-icon-btn:active { opacity: 0.7; transform: scale(0.94); }
 .nav-icon-btn svg { width: 16px; height: 16px; fill: var(--text); pointer-events: none; }
+.nav-icon-btn.voice-off { opacity: 0.35; }
 
 /* PILLS */
 .pills-wrap {
@@ -216,7 +218,7 @@ body {
 .wcard p { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
 .wgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-/* WELCOME GRID ITEMS - ULTRA CLICKABLE */
+/* WELCOME GRID ITEMS */
 .wgitem {
     background: var(--bg3);
     border-radius: 14px;
@@ -340,7 +342,7 @@ body {
 }
 .chips-row::-webkit-scrollbar { display: none; }
 
-/* CHIPS - ULTRA CLICKABLE */
+/* CHIPS */
 .chip {
     background: var(--bg2);
     border: 0.5px solid var(--border);
@@ -393,7 +395,7 @@ body {
 #inp::placeholder { color: var(--muted); }
 #inp::-webkit-scrollbar { display: none; }
 
-/* INPUT BUTTONS - ULTRA CLICKABLE */
+/* INPUT BUTTONS */
 .ibtn {
     width: 34px; height: 34px;
     border-radius: 50%;
@@ -419,11 +421,51 @@ body {
 #sbtn svg { fill: white; width: 15px; height: 15px; pointer-events: none; }
 #micBtn { background: var(--bg3); }
 #micBtn svg { fill: var(--muted); width: 16px; height: 16px; pointer-events: none; }
-#micBtn.listening { background: var(--red); animation: pulse 1s infinite; }
+#micBtn.listening { background: var(--red); }
 #micBtn.listening svg { fill: white; }
 #micBtn.speaking { background: var(--green); }
 #micBtn.speaking svg { fill: white; }
-@keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+
+@keyframes pulse-red {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(255,69,58,0.6); transform: scale(1); }
+    50%{ box-shadow: 0 0 0 10px rgba(255,69,58,0); transform: scale(1.08); }
+}
+@keyframes pulse-green {
+    0%,100%{ box-shadow: 0 0 0 0 rgba(48,209,88,0.6); transform: scale(1); }
+    50%{ box-shadow: 0 0 0 10px rgba(48,209,88,0); transform: scale(1.08); }
+}
+#micBtn.listening { animation: pulse-red 1s infinite; }
+#micBtn.speaking { animation: pulse-green 1.2s infinite; }
+
+/* RECORDING OVERLAY */
+.rec-overlay {
+    display: none;
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(30,30,32,0.97);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 28px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 9999;
+    border: 1px solid rgba(255,69,58,0.5);
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+}
+.rec-overlay.active { display: flex; }
+.rec-dot {
+    width: 9px; height: 9px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: blink 1s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.15;} }
 </style>
 <script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
 </head>
@@ -452,10 +494,10 @@ body {
             <div class="online-dot"></div>
         </div>
         <div class="nav-name">Étienne</div>
-        <div class="nav-status">AI Hacking Assistant · GPT-4o</div>
+        <div class="nav-status" id="navStatus">AI Hacking Assistant · GPT-4o</div>
     </div>
     <div class="nav-actions">
-        <button class="nav-icon-btn" id="voiceToggle" type="button" title="Voice on/off">
+        <button class="nav-icon-btn" id="voiceToggle" type="button" title="Speaker on/off">
             <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
         </button>
         <button class="nav-icon-btn" id="camBtn" type="button" title="Camera">
@@ -487,7 +529,7 @@ body {
     <div class="wcard" id="wcard">
         <img src="avatar.png" class="wcard-avatar" alt="Étienne">
         <h2>Bonjour, mon ami! 👋</h2>
-        <p>I'm Étienne — your GPT-4o French hacking assistant.<br>Tap a topic below or speak to me!</p>
+        <p>I'm Étienne — your GPT-4o French hacking assistant.<br>Tap a topic, type, or press 🎤 to speak to me!</p>
         <div class="wgrid" id="wgrid">
             <button class="wgitem" type="button" data-msg="How do I start ethical hacking?"><span class="icon">🔐</span>Ethical Hacking</button>
             <button class="wgitem" type="button" data-msg="Write a Python port scanner"><span class="icon">🐍</span>Python Code</button>
@@ -497,6 +539,12 @@ body {
             <button class="wgitem" type="button" data-msg="Explain SQL injection"><span class="icon">💉</span>SQL Injection</button>
         </div>
     </div>
+</div>
+
+<!-- Recording Overlay -->
+<div class="rec-overlay" id="recOverlay">
+    <div class="rec-dot"></div>
+    Listening… tap 🎤 again to send
 </div>
 
 <!-- Camera Preview -->
@@ -520,10 +568,10 @@ body {
         <button class="chip" type="button" data-msg="Explain Metasploit framework">🔫 Metasploit</button>
     </div>
     <div class="irow">
-        <button class="ibtn" id="micBtn" type="button" title="Voice input">
+        <button class="ibtn" id="micBtn" type="button" title="Tap to talk">
             <svg viewBox="0 0 24 24"><path d="M12 15c1.66 0 3-1.34 3-3V6c0-1.66-1.34-3-3-3S9 4.34 9 6v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 15.2 14.47 17 12 17s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V21c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/></svg>
         </button>
-        <textarea id="inp" placeholder="Message Étienne..." rows="1" autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
+        <textarea id="inp" placeholder="Message Étienne…" rows="1" autocomplete="off" autocorrect="on" spellcheck="true"></textarea>
         <button class="ibtn" id="sbtn" type="button">
             <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
         </button>
@@ -542,19 +590,49 @@ body {
 // SYSTEM PROMPT
 // ============================================
 var SYSTEM = "You are Étienne, a charming French AI assistant specialized in coding and ethical hacking.\n" +
-"Personality: witty, confident, charmingly French. Use phrases like 'Mon ami', 'Ooh là là', 'Magnifique!', 'Voilà!', 'Sacré bleu', 'Mais bien sûr!'. End with fun French signoffs.\n" +
+"Personality: witty, confident, charmingly French. Use phrases like 'Mon ami', 'Ooh là là', 'Magnifique!', 'Voilà!', 'Sacré bleu', 'Mais bien sûr!'. End messages with fun French signoffs.\n" +
 "Expertise: ethical hacking, Python, JavaScript, Bash, network security, CTF, OSINT, SQLi, XSS, Metasploit, Nmap, Burp Suite, Linux, cryptography, Tor (educational), dark web awareness, network privacy, web development.\n" +
 "Always emphasize ethical and legal use. Format code in markdown blocks. Never assist with illegal activities.";
 
 var chatHistory = [{role:'system', content:SYSTEM}];
 
 // ============================================
-// GPT-4o API
+// AUDIO CONTEXT — unlock iOS audio on first touch
 // ============================================
-async function callGPT(msg) {
+var audioCtx = null;
+var audioUnlocked = false;
+
+function unlockAudio() {
+    if (audioUnlocked) return;
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        audioUnlocked = true;
+    } catch(e) { console.warn('AudioContext unlock failed:', e); }
+}
+
+document.addEventListener('touchstart', unlockAudio, {once: true, passive: true});
+document.addEventListener('click', unlockAudio, {once: true, passive: true});
+
+// ============================================
+// GPT-4o API — max_tokens: 4000
+// ============================================
+async function callGPT(msg, isVoice) {
     var key = (typeof window._ETIENNE_KEY !== 'undefined') ? window._ETIENNE_KEY : '';
     if (!key) return "Mon Dieu! No API key found. Please add your key to config.js 🇫🇷";
-    chatHistory.push({role:'user', content:msg});
+
+    // Clone history and optionally add voice instruction
+    var messages = chatHistory.map(function(m, i) {
+        if (i === 0 && isVoice) {
+            return {
+                role: 'system',
+                content: m.content + "\n\nIMPORTANT — this is a VOICE query. Respond in 2-4 short, natural spoken sentences. No markdown. No bullet points. No code blocks. Speak naturally as if in conversation."
+            };
+        }
+        return m;
+    });
+    messages.push({role: 'user', content: msg});
+
     try {
         var res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -564,16 +642,18 @@ async function callGPT(msg) {
             },
             body: JSON.stringify({
                 model: 'gpt-4o',
-                messages: chatHistory,
-                max_tokens: 1000,
+                messages: messages,
+                max_tokens: isVoice ? 300 : 4000,
                 temperature: 0.85
             })
         });
         var data = await res.json();
         if (data.error) return "Mon Dieu! Error: " + data.error.message;
         var reply = data.choices[0].message.content;
-        chatHistory.push({role:'assistant', content:reply});
-        return fmtMD(reply);
+        // Commit to real history
+        chatHistory.push({role:'user', content: msg});
+        chatHistory.push({role:'assistant', content: reply});
+        return reply;
     } catch(e) {
         return "Sacré bleu! Network error, mon ami. Check your connection 🇫🇷";
     }
@@ -589,118 +669,311 @@ function fmtMD(t) {
 }
 
 // ============================================
+// OPENAI TTS — real voice through iPhone speaker
+// ============================================
+var voiceEnabled = true;
+var isSpeaking = false;
+var currentSource = null;
+
+async function speakOpenAI(text) {
+    if (!voiceEnabled) return;
+    var key = (typeof window._ETIENNE_KEY !== 'undefined') ? window._ETIENNE_KEY : '';
+    if (!key) return;
+
+    // Strip HTML/markdown for clean speech
+    var clean = text
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/```[\s\S]*?```/g, ' code block. ')
+        .replace(/`([^`]+)`/g, '$1')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/#+\s/g, '')
+        .replace(/\n+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    // Trim to ~600 chars, ending at a sentence
+    if (clean.length > 600) {
+        var cut = clean.substring(0, 600);
+        var last = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '));
+        clean = (last > 150) ? cut.substring(0, last + 1) : cut + '...';
+    }
+
+    if (!clean) return;
+
+    setMicState('speaking');
+    setNavStatus('🔊 Speaking…');
+    isSpeaking = true;
+
+    try {
+        var res = await fetch('https://api.openai.com/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + key
+            },
+            body: JSON.stringify({
+                model: 'tts-1',
+                input: clean,
+                voice: 'onyx',    // deep, rich masculine voice — perfect for Étienne
+                speed: 0.94
+            })
+        });
+
+        if (!res.ok) { throw new Error('TTS HTTP ' + res.status); }
+
+        var arrayBuf = await res.arrayBuffer();
+
+        // Ensure AudioContext is ready
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+        var audioBuf = await audioCtx.decodeAudioData(arrayBuf);
+        var source = audioCtx.createBufferSource();
+        source.buffer = audioBuf;
+        source.connect(audioCtx.destination);
+        currentSource = source;
+
+        source.onended = function() {
+            isSpeaking = false;
+            currentSource = null;
+            setMicState('idle');
+            setNavStatus('AI Hacking Assistant · GPT-4o');
+        };
+
+        source.start(0);
+
+    } catch(e) {
+        console.warn('OpenAI TTS failed, falling back to browser TTS:', e.message);
+        speakFallback(clean);
+    }
+}
+
+function stopSpeak() {
+    isSpeaking = false;
+    if (currentSource) {
+        try { currentSource.stop(); } catch(e) {}
+        currentSource = null;
+    }
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    setMicState('idle');
+    setNavStatus('AI Hacking Assistant · GPT-4o');
+}
+
+// Fallback: browser speechSynthesis
+function speakFallback(text) {
+    if (!window.speechSynthesis) {
+        isSpeaking = false;
+        setMicState('idle');
+        setNavStatus('AI Hacking Assistant · GPT-4o');
+        return;
+    }
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text.substring(0, 500));
+    u.rate = 0.92; u.pitch = 0.85; u.volume = 1.0;
+    // Pick a good English voice
+    var voices = window.speechSynthesis.getVoices();
+    var pref = ['Daniel', 'Google UK English Male', 'Alex', 'Fred'];
+    for (var i = 0; i < pref.length; i++) {
+        var v = voices.find(function(x) { return x.name === pref[i]; });
+        if (v) { u.voice = v; break; }
+    }
+    u.onend = function() { isSpeaking = false; setMicState('idle'); setNavStatus('AI Hacking Assistant · GPT-4o'); };
+    u.onerror = function() { isSpeaking = false; setMicState('idle'); setNavStatus('AI Hacking Assistant · GPT-4o'); };
+    window.speechSynthesis.speak(u);
+}
+
+// ============================================
+// OPENAI WHISPER STT — mic recording
+// ============================================
+var mediaRecorder = null;
+var audioChunks = [];
+var isRecording = false;
+
+async function startRecording() {
+    unlockAudio();
+    try {
+        var stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                sampleRate: 44100
+            }
+        });
+
+        audioChunks = [];
+
+        // Detect best supported mime type
+        var mimeType = '';
+        var candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+        for (var i = 0; i < candidates.length; i++) {
+            if (MediaRecorder.isTypeSupported(candidates[i])) {
+                mimeType = candidates[i];
+                break;
+            }
+        }
+
+        var opts = mimeType ? {mimeType: mimeType} : {};
+        mediaRecorder = new MediaRecorder(stream, opts);
+
+        mediaRecorder.ondataavailable = function(e) {
+            if (e.data && e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = function() {
+            stream.getTracks().forEach(function(t) { t.stop(); });
+            transcribeAudio();
+        };
+
+        mediaRecorder.start(200);
+        isRecording = true;
+        setMicState('listening');
+        setNavStatus('🎤 Listening…');
+        document.getElementById('recOverlay').classList.add('active');
+
+    } catch(err) {
+        console.error('Mic error:', err);
+        alert('Microphone access denied.\n\nPlease go to Settings → Safari → Microphone and allow access, then try again.');
+        isRecording = false;
+        setMicState('idle');
+    }
+}
+
+function stopRecording() {
+    if (!isRecording || !mediaRecorder) return;
+    isRecording = false;
+    document.getElementById('recOverlay').classList.remove('active');
+    setNavStatus('⏳ Transcribing…');
+    try { mediaRecorder.stop(); } catch(e) {}
+}
+
+async function transcribeAudio() {
+    var key = (typeof window._ETIENNE_KEY !== 'undefined') ? window._ETIENNE_KEY : '';
+    if (!key || audioChunks.length === 0) {
+        setMicState('idle');
+        setNavStatus('AI Hacking Assistant · GPT-4o');
+        return;
+    }
+
+    setMicState('speaking'); // green pulse = processing
+    setNavStatus('⏳ Processing…');
+
+    try {
+        var mimeType = (audioChunks[0] && audioChunks[0].type) ? audioChunks[0].type.split(';')[0] : 'audio/webm';
+        var ext = mimeType.includes('mp4') ? 'm4a' : mimeType.includes('ogg') ? 'ogg' : 'webm';
+        var blob = new Blob(audioChunks, {type: mimeType});
+
+        var fd = new FormData();
+        fd.append('file', blob, 'voice.' + ext);
+        fd.append('model', 'whisper-1');
+        fd.append('language', 'en');
+
+        var res = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+            method: 'POST',
+            headers: {'Authorization': 'Bearer ' + key},
+            body: fd
+        });
+
+        var data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+
+        var transcript = (data.text || '').trim();
+        if (!transcript) {
+            setMicState('idle');
+            setNavStatus('AI Hacking Assistant · GPT-4o');
+            return;
+        }
+
+        // Show in text field
+        var inp = document.getElementById('inp');
+        if (inp) inp.value = transcript;
+
+        setMicState('idle');
+        // Send as voice message (shorter GPT response, no markdown)
+        await doSend(transcript, true);
+
+    } catch(e) {
+        console.warn('Whisper failed:', e.message, '— falling back to browser STT');
+        setMicState('idle');
+        setNavStatus('AI Hacking Assistant · GPT-4o');
+        tryBrowserSTT();
+    }
+}
+
+// ============================================
+// BROWSER STT FALLBACK
+// ============================================
+var recognition = null;
+
+function tryBrowserSTT() {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    if (!recognition) {
+        recognition = new SR();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        recognition.onresult = function(e) {
+            var t = e.results[0][0].transcript;
+            setMicState('idle');
+            var inp = document.getElementById('inp');
+            if (inp) inp.value = t;
+            doSend(t, true);
+        };
+        recognition.onerror = function() { setMicState('idle'); setNavStatus('AI Hacking Assistant · GPT-4o'); };
+        recognition.onend = function() { setMicState('idle'); };
+    }
+    try { recognition.start(); setMicState('listening'); setNavStatus('🎤 Listening…'); } catch(e) {}
+}
+
+// ============================================
+// MIC STATE & TOGGLE
+// ============================================
+function setMicState(state) {
+    var btn = document.getElementById('micBtn');
+    if (!btn) return;
+    btn.className = 'ibtn';
+    if (state === 'listening') btn.classList.add('listening');
+    else if (state === 'speaking') btn.classList.add('speaking');
+}
+
+function toggleMic() {
+    unlockAudio();
+    if (isSpeaking) {
+        // Tapping mic while speaking: stop playback
+        stopSpeak();
+        return;
+    }
+    if (isRecording) {
+        // Tapping mic while recording: stop and transcribe
+        stopRecording();
+        return;
+    }
+    // Start new recording
+    startRecording();
+}
+
+// ============================================
+// NAV STATUS
+// ============================================
+function setNavStatus(txt) {
+    var el = document.getElementById('navStatus');
+    if (el) el.textContent = txt;
+}
+
+// ============================================
 // CLOCK
 // ============================================
 function updateClock() {
     var el = document.getElementById('statusTime');
     if (!el) return;
     var now = new Date();
-    var h = now.getHours(), m = now.getMinutes();
-    h = h % 12 || 12;
+    var h = now.getHours() % 12 || 12;
+    var m = now.getMinutes();
     el.textContent = h + ':' + (m < 10 ? '0' : '') + m;
 }
 updateClock();
 setInterval(updateClock, 15000);
-
-// ============================================
-// VOICE - TTS
-// ============================================
-var voiceEnabled = true;
-var isSpeaking = false;
-var selectedVoice = null;
-
-function loadVoices() {
-    if (!window.speechSynthesis) return;
-    var voices = window.speechSynthesis.getVoices();
-    var pref = ['Google UK English Male', 'Daniel', 'Alex', 'Microsoft David - English (United States)', 'Fred', 'Google US English'];
-    for (var i = 0; i < pref.length; i++) {
-        var v = voices.find(function(x) { return x.name === pref[i]; });
-        if (v) { selectedVoice = v; return; }
-    }
-    selectedVoice = voices.find(function(v) { return v.lang && v.lang.startsWith('en'); }) || voices[0] || null;
-}
-
-if (window.speechSynthesis) {
-    if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    loadVoices();
-}
-
-function speak(text) {
-    if (!voiceEnabled || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    var clean = text
-        .replace(/<[^>]*>/g, '')
-        .replace(/```[\s\S]*?```/g, 'code block')
-        .replace(/&/g, 'and')
-        .replace(/</g, 'less than')
-        .replace(/>/g, 'greater than');
-    if (clean.length > 500) clean = clean.substring(0, 500) + '...';
-    var u = new SpeechSynthesisUtterance(clean);
-    if (selectedVoice) u.voice = selectedVoice;
-    u.rate = 0.92; u.pitch = 0.88; u.volume = 1.0;
-    isSpeaking = true;
-    setMicState('speaking');
-    u.onend = function() { isSpeaking = false; setMicState('idle'); };
-    u.onerror = function() { isSpeaking = false; setMicState('idle'); };
-    window.speechSynthesis.speak(u);
-}
-
-function stopSpeak() {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    isSpeaking = false;
-    setMicState('idle');
-}
-
-// ============================================
-// VOICE - STT (Microphone)
-// ============================================
-var recognition = null;
-var isListening = false;
-
-function initRecognition() {
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return false;
-    recognition = new SR();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.onstart = function() { isListening = true; setMicState('listening'); };
-    recognition.onresult = function(e) {
-        var transcript = Array.from(e.results).map(function(r) { return r[0].transcript; }).join('');
-        var inp = document.getElementById('inp');
-        if (inp) inp.value = transcript;
-        if (e.results[e.results.length - 1].isFinal) {
-            isListening = false;
-            setMicState('idle');
-            doSend(transcript);
-        }
-    };
-    recognition.onerror = function() { isListening = false; setMicState('idle'); };
-    recognition.onend = function() { isListening = false; setMicState('idle'); };
-    return true;
-}
-
-function setMicState(state) {
-    var btn = document.getElementById('micBtn');
-    if (!btn) return;
-    btn.className = 'ibtn' + (state === 'listening' ? ' listening' : state === 'speaking' ? ' speaking' : '');
-}
-
-function toggleMic() {
-    if (isSpeaking) { stopSpeak(); return; }
-    if (!recognition) {
-        var ok = initRecognition();
-        if (!ok) { alert('Voice recognition not supported in this browser. Try Chrome or Safari on iOS.'); return; }
-    }
-    if (isListening) {
-        recognition.stop();
-    } else {
-        stopSpeak();
-        try { recognition.start(); } catch(e) { isListening = false; setMicState('idle'); }
-    }
-}
 
 // ============================================
 // CAMERA
@@ -710,45 +983,42 @@ var facingMode = 'environment';
 
 function openCamera() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Camera not available. Please allow camera access in Safari settings.');
+        alert('Camera not available.');
         return;
     }
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: facingMode }, audio: false })
+    navigator.mediaDevices.getUserMedia({video: {facingMode: facingMode}, audio: false})
         .then(function(stream) {
             camStream = stream;
-            var video = document.getElementById('camVideo');
-            if (video) video.srcObject = stream;
-            var preview = document.getElementById('camPreview');
-            if (preview) preview.classList.add('active');
+            var v = document.getElementById('camVideo');
+            if (v) v.srcObject = stream;
+            var p = document.getElementById('camPreview');
+            if (p) p.classList.add('active');
         })
         .catch(function() {
-            alert('Camera access denied. Allow camera in Settings > Safari > Camera.');
+            alert('Camera access denied. Allow in Settings > Safari > Camera.');
         });
 }
 
 function closeCamera() {
-    if (camStream) {
-        camStream.getTracks().forEach(function(t) { t.stop(); });
-        camStream = null;
-    }
-    var preview = document.getElementById('camPreview');
-    if (preview) preview.classList.remove('active');
+    if (camStream) { camStream.getTracks().forEach(function(t){t.stop();}); camStream = null; }
+    var p = document.getElementById('camPreview');
+    if (p) p.classList.remove('active');
 }
 
 function flipCamera() {
-    facingMode = facingMode === 'environment' ? 'user' : 'environment';
+    facingMode = (facingMode === 'environment') ? 'user' : 'environment';
     closeCamera();
     setTimeout(openCamera, 300);
 }
 
 function takePhoto() {
-    var video = document.getElementById('camVideo');
-    if (!video) return;
-    var canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    canvas.getContext('2d').drawImage(video, 0, 0);
-    var imgData = canvas.toDataURL('image/jpeg', 0.8);
+    var v = document.getElementById('camVideo');
+    if (!v) return;
+    var c = document.createElement('canvas');
+    c.width = v.videoWidth || 640;
+    c.height = v.videoHeight || 480;
+    c.getContext('2d').drawImage(v, 0, 0);
+    var img = c.toDataURL('image/jpeg', 0.8);
     closeCamera();
     var chat = document.getElementById('chat');
     if (!chat) return;
@@ -759,12 +1029,12 @@ function takePhoto() {
     var bub = document.createElement('div');
     bub.className = 'bubble';
     bub.style.cssText = 'padding:4px;background:#0a84ff;';
-    bub.innerHTML = '<img src="' + imgData + '" style="max-width:200px;border-radius:12px;display:block;">';
+    bub.innerHTML = '<img src="' + img + '" style="max-width:200px;border-radius:12px;display:block;">';
     wrap.appendChild(bub);
     row.appendChild(wrap);
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
-    doSend('I just took a photo. What security elements should I be aware of in this environment?');
+    doSend('I just took a photo. What security elements should I be aware of in this environment?', false);
 }
 
 // ============================================
@@ -790,7 +1060,7 @@ function addMsg(text, isUser) {
     }
     var bub = document.createElement('div');
     bub.className = 'bubble';
-    if (isUser) { bub.textContent = text; } else { bub.innerHTML = text; }
+    bub.innerHTML = isUser ? escHTML(text) : fmtMD(text);
     wrap.appendChild(bub);
     row.appendChild(wrap);
     var t = document.createElement('div');
@@ -799,6 +1069,10 @@ function addMsg(text, isUser) {
     row.appendChild(t);
     chat.appendChild(row);
     chat.scrollTop = chat.scrollHeight;
+}
+
+function escHTML(s) {
+    return s.replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');
 }
 
 function showTyping() {
@@ -818,13 +1092,13 @@ function hideTyping() {
     if (t) t.parentNode.removeChild(t);
 }
 
-async function doSend(text) {
+async function doSend(text, isVoice) {
     if (!text || !text.trim()) return;
     text = text.trim();
+    isVoice = !!isVoice;
 
-    // Hide chips row and welcome card on first message
-    var chips = document.getElementById('chipsRow');
-    if (chips) chips.style.display = 'none';
+    var chipsRow = document.getElementById('chipsRow');
+    if (chipsRow) chipsRow.style.display = 'none';
 
     stopSpeak();
     addMsg(text, true);
@@ -832,23 +1106,30 @@ async function doSend(text) {
     var inp = document.getElementById('inp');
     if (inp) { inp.value = ''; inp.style.height = 'auto'; }
 
+    setNavStatus('⏳ Thinking…');
     showTyping();
-    var reply = await callGPT(text);
+
+    var reply = await callGPT(text, isVoice);
     hideTyping();
     addMsg(reply, false);
-    if (voiceEnabled) speak(reply.replace(/<[^>]*>/g, ''));
+
+    if (voiceEnabled) {
+        await speakOpenAI(reply);
+    } else {
+        setNavStatus('AI Hacking Assistant · GPT-4o');
+    }
 }
 
 // ============================================
 // INTRO SPEECH
 // ============================================
-function doIntro() {
-    var intro = "Bonjour mon ami! I am Étienne, your personal French hacking and coding assistant, powered by G P T 4. I am here to help you with ethical hacking, Python, cybersecurity, O S I N T, and much more. Ask me anything — I never disappoint! Voilà!";
-    speak(intro);
+async function doIntro() {
+    var intro = "Bonjour mon ami! I am Étienne, your personal French hacking and coding assistant, powered by GPT-4o. I am here to help you with ethical hacking, Python, cybersecurity, OSINT, and much more. Ask me anything — I never disappoint! Voilà!";
+    await speakOpenAI(intro);
 }
 
 // ============================================
-// ATTACH ALL EVENTS — using both click and touchend
+// TAP HELPER — click + touchend
 // ============================================
 function tap(el, fn) {
     if (!el) return;
@@ -863,53 +1144,34 @@ function tap(el, fn) {
     }, {passive: false});
 }
 
+// ============================================
+// BIND ALL EVENTS
+// ============================================
 function bindEvents() {
-    // Send button
     tap(document.getElementById('sbtn'), function() {
         var inp = document.getElementById('inp');
-        if (inp) doSend(inp.value);
+        if (inp) doSend(inp.value, false);
     });
 
-    // Mic button
-    tap(document.getElementById('micBtn'), function() {
-        toggleMic();
-    });
+    tap(document.getElementById('micBtn'), toggleMic);
+    tap(document.getElementById('camBtn'), openCamera);
+    tap(document.getElementById('camClose'), closeCamera);
+    tap(document.getElementById('camShutter'), takePhoto);
+    tap(document.getElementById('camFlip'), flipCamera);
 
-    // Camera button
-    tap(document.getElementById('camBtn'), function() {
-        openCamera();
-    });
-
-    // Camera close
-    tap(document.getElementById('camClose'), function() {
-        closeCamera();
-    });
-
-    // Camera shutter
-    tap(document.getElementById('camShutter'), function() {
-        takePhoto();
-    });
-
-    // Camera flip
-    tap(document.getElementById('camFlip'), function() {
-        flipCamera();
-    });
-
-    // Voice toggle
     tap(document.getElementById('voiceToggle'), function() {
         voiceEnabled = !voiceEnabled;
         stopSpeak();
         var btn = document.getElementById('voiceToggle');
-        if (btn) btn.style.opacity = voiceEnabled ? '1' : '0.35';
+        if (btn) btn.classList.toggle('voice-off', !voiceEnabled);
     });
 
-    // Enter key in textarea
     var inp = document.getElementById('inp');
     if (inp) {
         inp.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                doSend(this.value);
+                doSend(this.value, false);
             }
         });
         inp.addEventListener('input', function() {
@@ -918,40 +1180,35 @@ function bindEvents() {
         });
     }
 
-    // PILLS — each pill is a button, direct event
-    var pills = document.querySelectorAll('.pill[data-topic]');
-    pills.forEach(function(pill) {
-        tap(pill, function() {
-            doSend('Tell me about ' + pill.getAttribute('data-topic'));
-        });
+    document.querySelectorAll('.pill[data-topic]').forEach(function(pill) {
+        tap(pill, function() { doSend('Tell me about ' + pill.getAttribute('data-topic'), false); });
     });
 
-    // WELCOME GRID ITEMS — each is a button, direct event
-    var wgItems = document.querySelectorAll('.wgitem[data-msg]');
-    wgItems.forEach(function(item) {
-        tap(item, function() {
-            doSend(item.getAttribute('data-msg'));
-        });
+    document.querySelectorAll('.wgitem[data-msg]').forEach(function(item) {
+        tap(item, function() { doSend(item.getAttribute('data-msg'), false); });
     });
 
-    // CHIPS — each chip is a button, direct event
-    var chips = document.querySelectorAll('.chip[data-msg]');
-    chips.forEach(function(chip) {
-        tap(chip, function() {
-            doSend(chip.getAttribute('data-msg'));
-        });
+    document.querySelectorAll('.chip[data-msg]').forEach(function(chip) {
+        tap(chip, function() { doSend(chip.getAttribute('data-msg'), false); });
     });
 }
 
 // ============================================
-// INIT — wait for DOM ready
+// INIT — intro plays on first user touch (iOS audio policy)
 // ============================================
 function init() {
     bindEvents();
-    setTimeout(doIntro, 1800);
+    var introPlayed = false;
+    function playIntroOnce() {
+        if (introPlayed) return;
+        introPlayed = true;
+        unlockAudio();
+        setTimeout(doIntro, 400);
+    }
+    document.addEventListener('touchend', playIntroOnce, {once: true, passive: true});
+    document.addEventListener('click', playIntroOnce, {once: true, passive: true});
 }
 
-// Guaranteed DOM ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
