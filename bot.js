@@ -889,53 +889,8 @@ function hideTyping() {
     if (typing) typing.remove();
 }
 
-function sendMessage() {
-    const input = document.getElementById('userInput');
-    const text = input.value.trim();
-    if (!text) return;
-
-    // Hide suggestions after first message
-    const suggestionsRow = document.getElementById('suggestionsRow');
-    if (suggestionsRow) suggestionsRow.style.display = 'none';
-
-    addMessage(text, true);
-    input.value = '';
-    input.style.height = 'auto';
-
-    showTyping();
-
-    const delay = Math.floor(Math.random() * 800) + 600;
-    setTimeout(() => {
-        hideTyping();
-        const response = getResponse(text);
-        addMessage(response, false);
-    }, delay);
-}
-
-function sendSuggestion(text) {
-    const input = document.getElementById('userInput');
-    input.value = text;
-    autoResize(input);
-    sendMessage();
-}
-
-function insertTopic(topic) {
-    const input = document.getElementById('userInput');
-    input.value = `Tell me about ${topic}`;
-    autoResize(input);
-    input.focus();
-    // Auto send immediately on mobile tap
-    setTimeout(() => sendMessage(), 100);
-}
-
-function handleKeyDown(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
-    }
-}
-
-function autoResize(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
-}
+// Legacy aliases (kept for compatibility)
+function sendMessage() { if(window.doSend) window.doSend(document.getElementById('inp') ? document.getElementById('inp').value.trim() : ''); }
+function sendSuggestion(text) { if(window.doSend) window.doSend(text); }
+function insertTopic(topic) { if(window.doSend) window.doSend('Tell me about ' + topic); }
+function autoResize(el) { if(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; } }
